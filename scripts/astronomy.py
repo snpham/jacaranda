@@ -3,6 +3,8 @@ from astropy.io import fits
 
 
 def calculate_mean(vals):
+  """slow version to compute mean
+  """
   return sum(vals)/len(vals)
 
 
@@ -52,7 +54,7 @@ def get_argmax_fits(fits_file):
 def mean_median(data):
   """get the mean and median of a list of values
   """
-  mean = sum(data)/len(data)
+  mean = np.mean(data)
   data_sorted = np.sort(data)
   mid = int(len(data_sorted)/2)
   if len(data_sorted)%2 == 0:
@@ -61,6 +63,27 @@ def mean_median(data):
     median = data_sorted[mid]
   median = round(median, 3)
   return (round(float(median), 2), mean)
+
+
+def median_fits(fitsfiles):
+  """get median of list of fits files using numpy stacking
+  """
+  # read in all the FITS files and store in list
+  fits_list = []
+  for fitsfile in fitsfiles: 
+    hdulist = fits.open(fitsfile)
+    fits_list.append(hdulist[0].data)
+    hdulist.close()
+
+  # stack fits arrays in 3D arrays
+  fits_stack = np.dstack(fits_list)
+  median = np.median(fits_stack, axis=2)
+
+  # calculate the memory consumed by the data (kB)
+  memory = fits_stack.nbytes / 1024
+
+  return median
+
 
 
 if __name__ == '__main__':
