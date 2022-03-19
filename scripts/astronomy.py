@@ -86,9 +86,9 @@ def median_fits(fitsfiles):
 
 def welfords_method(fitsfiles):
   '''Calculates the running mean and stdev for a list of FITS files 
-  using Welford's method. https://jonisalonen.com/2013/deriving-
-  welfords-method-for-computing-variance/
-  https://www.embeddedrelated.com/showarticle/785.php
+  using Welford's method. 
+  https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+  https://www.jstor.org/stable/1266577
   '''
 
   for n, fitsfile in enumerate(fitsfiles, 1):

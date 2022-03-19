@@ -172,6 +172,56 @@ SDSS Imaging
 
 
 \subsection{Statistical Analysis}
+One of the major issues in working with large datasets is that the standard analytical
+evaluation of statistical formulas requires an entire batch of data samples to
+be stored in memory for computation. Having 100's of thousands of samples can
+quickly exceed the memory limit of an average laptop or computer. This is especially
+the case when running analysis on embedded systems where memory is a driving constraint
+of performance. Stream processing allows a user to run calculations as the data comes in
+and releases memory that held samples of data from previous use.
+
+Welford's method for statistical analysis allows the use of stream processing to
+compute some statistical parameters \cite{welford}. This method gives accurate estimates of the 
+mean and variance without having to store all the data in memory. The standard process for computing
+standard deviation is to compute the mean of the data in one pass, then calculate the square
+deviation of values from the mean in the second pass. In crude methods of numerically computing
+deviation and means, one can compute the same standard deviation in one pass. Equation \ref{eqn_stddev} shows
+this method by accumulating the sums of $x_i$ and $x_{i}^{2}$. This subtraction can result in 
+loss of accuracy if the square of the mean is large while the variance is small.
+
+\begin{equation} \label{eqn_stddev}
+  \begin{split}
+    \sigma =\sqrt{(n\sum_{1\leq i\leq n}x_{i}^{2}-(\sum_{1\leq i\leq n} x_{i})^2)/n(n-1)}
+  \end{split}
+\end{equation}
+
+Welford's method simply keeps a running sum of the data, number of samples, 
+and deviation from data collected so far, and the user can view the sample variance and
+mean at anytime during the computational process to view their progression. Equation \ref{eqn_w1} show
+the recurrence formula from Welford which takes into account only the current and previous sample values.
+Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w3} for the standard deviation. 
+
+\begin{equation} \label{eqn_w1}
+  \begin{split}
+    M_{2,n}=M_{2,n-1}+(x_n -\bar{x}_{n-1})(x_n -\bar{x}_{n})
+  \end{split}
+\end{equation}
+
+\begin{equation} \label{eqn_w2}
+  \begin{split}
+    \sigma_{n}^{2}=\frac{M_{2,n}}{n}
+  \end{split}
+\end{equation}
+
+\begin{equation} \label{eqn_w3}
+  \begin{split}
+    s_{n}^{2}=\frac{M_{2,n}}{n-1}
+  \end{split}
+\end{equation}
+
+
+
+
 
 
 \subsection{Imaging}
@@ -188,21 +238,24 @@ SDSS Imaging
   \label{fig:sample}
 \end{figure}
 
-\subsubsection{Subsubsection}
-
-
-\paragraph{Paragraph}
-
-Nulla
 
 
 
 \section{Evaluation}
 
+ 
+\subsection{Statistical Analysis}
 
+
+\subsection{Imaging}
+
+
+\subsection{Spectroscopy}
 
 
 \section{Results}
+
+
 
 
 
@@ -212,6 +265,7 @@ Nulla
 
 
 \section{Conclusion}
+
 
 
 
