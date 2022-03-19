@@ -24,3 +24,4 @@ dataset
 .ipynb_checkpoints
 outputs/plots
 __pycache__
+inputs/legacy_survey/*.fits
