@@ -33,21 +33,21 @@ def mean_fits(fits_files):
   """
   n = len(fits_files)
   if n > 0:
-    hdulist = fits.open(fits_files[0])
-    data = np.copy(hdulist[0].data)
-    for i in range(1,n):
-      data += fits.open(fits_files[i])[0].data
+    with fits.open(fits_files[0]) as hdulist:
+      data = np.copy(hdulist[0].data)
+      for i in range(1,n):
+        data += fits.open(fits_files[i])[0].data
 
     data_mean = data/n
     return data_mean
-      
+
 
 def get_argmax_fits(fits_file):
   """get index of highest value in a fits file
   """
-  hdulist = fits.open(fits_file)
-  data = hdulist[0].data
-  argmax = np.argwhere(data==data.max())[0]
+  with fits.open(fits_file) as hdulist:
+    data = hdulist[0].data
+    argmax = np.argwhere(data==data.max())[0]
   return tuple(argmax)
 
 
@@ -71,9 +71,8 @@ def median_fits(fitsfiles):
   # read in all the FITS files and store in list
   fits_list = []
   for fitsfile in fitsfiles: 
-    hdulist = fits.open(fitsfile)
-    fits_list.append(hdulist[0].data)
-    hdulist.close()
+    with fits.open(fitsfile) as hdulist:
+      fits_list.append(hdulist[0].data)
 
   # stack fits arrays in 3D arrays
   fits_stack = np.dstack(fits_list)
@@ -85,10 +84,151 @@ def median_fits(fitsfiles):
   return median
 
 
+def welfords_method(fitsfiles):
+  '''Calculates the running mean and stdev for a list of FITS files 
+  using Welford's method. https://jonisalonen.com/2013/deriving-
+  welfords-method-for-computing-variance/
+  https://www.embeddedrelated.com/showarticle/785.php
+  '''
+
+  for n, fitsfile in enumerate(fitsfiles, 1):
+    with fits.open(fitsfile) as hdulist:
+      data = hdulist[0].data
+      # initialize mean and std 
+      if n == 1:
+        mean = np.zeros_like(data)
+        s = np.zeros_like(data)
+
+      # running (x - x_bar)
+      delta = data - mean
+      # running x_bar
+      mean += delta/n
+      # running std
+      s += delta*(data - mean)
+
+  # compute total std dev
+  s /= (n - 1)
+  np.sqrt(s, s)
+
+  if n < 2:
+    return mean, None
+  else:
+    return mean, s
+
+
+def median_bins(data, nbins):
+  """use bin approximation method to compute median; this function 
+  organizes the data samples into bins
+  """
+  mean = np.mean(data)
+  std = np.std(data)
+  left_bin = 0
+  bins = np.zeros(nbins)
+  bin_width = 2 * std / nbins
+  
+  for val in data:
+    # place data points smaller than min val to ignore bin
+    if val < mean-std:
+      left_bin += 1
+    # stores data points within range into bins
+    elif val < mean+std:
+      bin = int((val - (mean-std))/bin_width)
+      bins[bin] += 1 
+    # Ignore values above mean + std
+
+  return mean, std, left_bin, bins
+
+
+def median_approx(values, nbins):
+  """use bin approximation method to compute median; this function
+  calls median_bins, then approximates the median by counting 
+  magnitudes of each bin in sequence.
+  """
+  mean, std, left_bin, bins = median_bins(values, nbins)
+
+  # position of the middle element
+  mid_count = (len(values)+1)/2
+
+  # start with the ignored bin (val < mean-std)
+  count = left_bin
+  
+  # add bin count to total count
+  for b, bin_count in enumerate(bins):
+    count += bin_count
+    if count >= mid_count:
+      break
+  
+  # get the median approximation
+  width = 2 * std/nbins
+  median = mean - std + width*(b+0.5)
+  return median
+  
+
+def median_bins_fits(fitsfiles, nbins):
+      
+  # calculate the mean and standard deviation using the running method
+  mean, std = welfords_method(fitsfiles)
+    
+  # get dimensions of the FITS file
+  dim = mean.shape
+  
+  # initialise 3D bins
+  left_bin = np.zeros(dim)
+  bins = np.zeros((dim[0], dim[1], nbins))
+  bin_width = 2 * std / nbins 
+
+  # loop over all FITS files
+  for fitsfile in fitsfiles:
+    with fits.open(fitsfile) as hdulist:
+      data = hdulist[0].data
+
+      # loop over every point in the 2D array
+      for i in range(dim[0]):
+        for j in range(dim[1]):
+          value = data[i, j]
+          lower_bound = mean[i, j] - std[i, j]
+          upper_bound = mean[i, j] + std[i, j]
+
+          # adding to the ignored bin (val < x_bar-std)
+          if value < lower_bound:
+            left_bin[i, j] += 1
+          # adding to the appropriate bin
+          elif value >= lower_bound and value < upper_bound:
+            bin = int( (value - lower_bound) / bin_width[i, j] )
+            bins[i, j, bin] += 1
+          # ignoring values higher than upper bound limit
+
+  return mean, std, left_bin, bins
+
+
+def median_approx_fits(filenames, nbins):
+  mean, std, left_bin, bins = median_bins_fits(filenames, nbins)
+    
+  # get dimensions of the FITS file
+  dim = mean.shape
+    
+  # position of the middle element over all files
+  mid = (len(filenames) + 1) / 2
+	
+  # calculate the approximated median for each array element
+  bin_width = 2 * std / nbins
+  median = np.zeros(dim)   
+  for i in range(dim[0]):
+    for j in range(dim[1]):    
+
+      count = left_bin[i, j]
+      for b, bincount in enumerate(bins[i, j]):
+        count += bincount
+        if count >= mid:
+          # stop when the cumulative count exceeds the midpoint
+          break
+      median[i, j] = mean[i, j] - std[i, j] + bin_width[i, j]*(b + 0.5)
+      
+  return median
+
 
 if __name__ == '__main__':
   pass
-
 
   fluxes = [23.3, 42.1, 2.0, -3.2, 55.6]
   m = np.mean(fluxes)
