@@ -227,6 +227,40 @@ def median_approx_fits(filenames, nbins):
   return median
 
 
+def hms2dec(hours, minutes, seconds):
+  """convert right ascension HMS to decimal degrees; 0 <= hours < 24;
+  RA = angle from the vernal equinox to the point, going east along
+  the celestial equator
+  """
+  return 15*(hours + minutes/60 + seconds/3600)
+
+
+def dms2dec(degrees, arcminutes, arcseconds):
+  """convert declination from DMS to decimal degrees; -90 <= degrees < 90;
+  the anglefrom the celestial equator to the point, (+) going north
+  """
+  return degrees + np.sign(degrees)*(arcminutes/60 + arcseconds/3600)
+
+
+def greatcirc_dist(coords1, coords2):
+  """computes the great circle distance between 2 points on a sphere
+  using RA and Dec; applies the haversine formula
+  :param coords1: [RA, Dec] for first object
+  :param coords2: [RA, Dec] for second object
+  :return: angular distance (radians)
+  """
+  ra1 = coords1[0]
+  dec1 = coords1[1]
+  ra2 = coords2[0]
+  dec2 = coords2[1]
+
+  b = np.cos(dec1)*np.cos(dec2)*np.sin(np.abs(ra1 - ra2)/2)**2
+  a = np.sin(np.abs(dec1 - dec2)/2)**2
+  d = 2*np.arcsin(np.sqrt(a + b))
+
+  return d
+
+
 if __name__ == '__main__':
   pass
 
@@ -234,3 +268,7 @@ if __name__ == '__main__':
   m = np.mean(fluxes)
   m2 = sum(fluxes)/len(fluxes)
   print(m, m2)
+
+  h_degs = greatcirc_dist([np.radians(21.07), np.radians(0.1)], 
+                          [np.radians(21.15), np.radians(8.2)])
+  assert np.allclose(np.degrees(h_degs), 8.1003923)
