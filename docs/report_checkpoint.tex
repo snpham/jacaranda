@@ -149,7 +149,9 @@ than one-third of the entire celestial sphere \cite{SDSS}.
 
 \section{Datasets}
 
-SDSS Imaging
+SDSS Imaging dataset.
+\\
+
 \begin{table}[]
   \begin{tabular}{ |p{3cm}|p{2.8cm}|p{1.6cm}|  } \hline
    Parameter & Description & Unit  \\ \hline
@@ -169,6 +171,62 @@ SDSS Imaging
 
 
 \subsection{Data Integration}
+There are many available sources that provide celestial sky survey data. In astronomy,
+many use a common file transfer type called Flexible Image Transport System (FITS), 
+mainly used for image file transfer, but can also be used to store any type of data 
+that can fit in a multi-dimensional array or table. Typical sky surveys contain 
+equitorial coordinates, defined relative to the celestial sphere, that can be used to 
+identify position of an object in the sky. These surveys also contain object ID's that 
+is used to reference a particular object within a catalog or database. These object 
+ID's are then used as keys to integrate various databases together. 
+\\
+To link the many objects from various data sources, the common method is to obtain
+the right ascension (RA) and declination (DEC) of the object in the celestial frame. 
+RA is measured from the vernal equinox to the point of interest, going positive east
+along the celestial equator. The vernal equinox is the intersection of the celestial 
+equator and the ecliptic where the ecliptic crosses the ascending node. The RA varies 
+from 0 to 24 hours, and typically measured in hours-minutes-seconds (HMS). To get RA 
+in decimal degrees, Equation \ref{eqn_ra} is used. 
+\\
+DEC is the angle from the celestial equator to the point of interest, positive going 
+north (and negative going south). DEC varies from -90 to +90 degrees, with fractions 
+of a degree measured in arcminutes and arcseconds. The notation for DEC is 
+degrees-minutes-seconds, with a full circle providing 360 degrees, each degree having 
+60 arcminutes and each arcminute having 60 arcseconds. DEC in decimal degrees can be 
+obtained using Equation \ref{eqn_dec}. Some surveys, such as the SuperCOSMOS survey, 
+already has their data in this format, but sources such as the Australia Telescope 
+20-GHz Survey contains coordinates in the standard form and must be converted.
+
+\begin{equation} \label{eqn_ra}
+  \begin{split}
+    RA_{deg}= 15(hours + \frac{minutes}{60} + \frac{seconds}{3600}) 
+  \end{split}
+\end{equation}
+
+\begin{equation} \label{eqn_dec}
+  \begin{split}
+  & DEC_{deg}= degrees+ \\
+  & sign(degrees)(\frac{arcminutes}{60} + \frac{arcseconds}{3600})
+  \end{split}
+\end{equation}
+
+Once all sources format is converted in to a common decimal degrees format, the 
+datasets can be read and integrated into a common database. To connect objects 
+from different surveys together, we must look at the coordinates of the
+objects within each catalog and cross-match to find its closest counterpart, 
+measured by the angular distance between them. Since the position of two given 
+objects are measured as points on a sphere, the great-circle distance must be 
+computed. This can be achieved using the haversine formula, which computes the 
+distance of two points using a set of right ascension and declination angles, 
+as shown in \ref{eqn_haversine}, where $\alpha$ and $\delta$ are the corresponding
+RA and DEC of the two points.
+
+\begin{equation} \label{eqn_haversine}
+  \begin{split}
+   & d_{\theta} = 2 \arcsin \cdot \\
+   & {\sqrt{\sin^2\frac{\left| \delta_1 - \delta_2 \right|}{2} + \cos{\delta_1}\cos{\delta_2}\sin^2\frac{\left| \alpha_1 - \alpha_2 \right|}{2}}}  
+  \end{split}
+\end{equation}
 
 
 \subsection{Statistical Analysis}
@@ -179,7 +237,7 @@ quickly exceed the memory limit of an average laptop or computer. This is especi
 the case when running analysis on embedded systems where memory is a driving constraint
 of performance. Stream processing allows a user to run calculations as the data comes in
 and releases memory that held samples of data from previous use.
-
+\\
 Welford's method for statistical analysis allows the use of stream processing to
 compute some statistical parameters \cite{welford}. This method gives accurate estimates of the 
 mean and variance without having to store all the data in memory. The standard process for computing

@@ -245,20 +245,20 @@ def dms2dec(degrees, arcminutes, arcseconds):
 def greatcirc_dist(coords1, coords2):
   """computes the great circle distance between 2 points on a sphere
   using RA and Dec; applies the haversine formula
-  :param coords1: [RA, Dec] for first object
-  :param coords2: [RA, Dec] for second object
-  :return: angular distance (radians)
+  :param coords1: [RA, Dec] for first object (degrees)
+  :param coords2: [RA, Dec] for second object (degrees)
+  :return: angular distance (degrees)
   """
-  ra1 = coords1[0]
-  dec1 = coords1[1]
-  ra2 = coords2[0]
-  dec2 = coords2[1]
+  ra1 = np.radians(coords1[0])
+  dec1 = np.radians(coords1[1])
+  ra2 = np.radians(coords2[0])
+  dec2 = np.radians(coords2[1])
 
   b = np.cos(dec1)*np.cos(dec2)*np.sin(np.abs(ra1 - ra2)/2)**2
   a = np.sin(np.abs(dec1 - dec2)/2)**2
   d = 2*np.arcsin(np.sqrt(a + b))
 
-  return d
+  return np.degrees(d)
 
 
 if __name__ == '__main__':
@@ -269,6 +269,6 @@ if __name__ == '__main__':
   m2 = sum(fluxes)/len(fluxes)
   print(m, m2)
 
-  h_degs = greatcirc_dist([np.radians(21.07), np.radians(0.1)], 
-                          [np.radians(21.15), np.radians(8.2)])
-  assert np.allclose(np.degrees(h_degs), 8.1003923)
+  h_degs = greatcirc_dist([21.07, 0.1], 
+                          [21.15, 8.2])
+  assert np.allclose(h_degs, 8.1003923)
