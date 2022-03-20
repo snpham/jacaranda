@@ -6,10 +6,10 @@ import astronomy as astro
 def bss_import(fn):
     output = []
     with fits.open(fn) as hdul:
-        info = hdul.info()
-        hdr = hdul[1].header
-        cols = hdul[1].columns
-        cols_names = cols.names
+        # info = hdul.info()
+        # hdr = hdul[1].header
+        # cols = hdul[1].columns
+        # cols_names = cols.names
         data = hdul[1].data
         for ii, row in enumerate(data, 1):
             if row[5] == '-':
@@ -18,7 +18,7 @@ def bss_import(fn):
             else:
                 output.append((ii, astro.hms2dec(row[2], row[3], row[4]),
                                    astro.dms2dec(row[6], row[7], row[8])))
-    return output
+    return np.array(output)
 
 
 
