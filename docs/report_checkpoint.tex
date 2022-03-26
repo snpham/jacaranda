@@ -228,6 +228,33 @@ RA and DEC of the two points.
   \end{split}
 \end{equation}
 
+Although this computation is useful in helping integrate multiple sources together, 
+the algorithm does not scale well. Since the algorithm requires the calculation of
+the distance of each data object from one catalog to each data object in the second
+catalog, the time complexity is O(n*m), where n and m are the counts of data objects
+in the catalogs. This is not an issue for catalogs with a few hundred samples,
+but typical catalogs such as the SDSS contains over a million data points, which will
+be prohibitively expensive to compute.
+
+An improved algorithm was used for this project's analysis. The first method was to
+use Python's numpy array structure to automatically loop through a catalog dataset. This
+provided a speed boost compared to standard Python standard library, but slowed down
+significantly when working with datasets greater than 10 million data objects. The second
+method was to contrain the search to within a given angular radius away from the desired
+celestial location, which will disregard points located outside of this radius. To find
+this index value within a catalog, a binary search is performed, where the catalog is 
+repeatedly split in half until the value of interest is found. This provided a boost in
+performance for small and medium sized datasets, but slows down significantly for datasets 
+with over 100 million data objects. The final method was to use a k-d tree to perform
+the crossmatching. Similar to the binary search algorithm, the k-d tree divides the 
+k-dimensional space into two parts recursively until each segment is it's own leaf. 
+
+
+
+
+
+
+
 
 \subsection{Statistical Analysis}
 One of the major issues in working with large datasets is that the standard analytical

@@ -26,3 +26,4 @@ outputs/plots
 __pycache__
 inputs/legacy_survey/*.fits
 inputs/SCOS_XSC_mCl1_B21.5_R20_noStepWedges.csv
+inputs/*

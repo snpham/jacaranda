@@ -39,6 +39,7 @@ def find_closest_obj(catalog, target_coord):
 
 def catalog_crossmatch(catalog1, catalog2, max_angle):
     """crossmatches 2 catalogs within a maximum angular distance.
+    fast for small crossmatching small datasets
     :param catalog1: array for first catalog (objid, ra, dec) [deg]
     :param catalog2: array for second catalog (objid, ra, dec) [deg]
     :param max_angle: maximum angular distance threshold (degrees)
@@ -58,7 +59,7 @@ def catalog_crossmatch(catalog1, catalog2, max_angle):
     non_matches = []
     for id1, ra1, dec1 in cat1_copy:
         dists = astronomy.greatcirc_dist([ra1, dec1], 
-                                         [cat2_copy[:,1], cat2_copy[:,2]])
+                                    [cat2_copy[:,1], cat2_copy[:,2]])
         closest_objid = np.argmin(dists)
         closest_dist = dists[closest_objid]
         
@@ -69,7 +70,8 @@ def catalog_crossmatch(catalog1, catalog2, max_angle):
             matches.append((id1, closest_objid, closest_dist))
 
     matches = np.array(matches)
-    matches[:,2] = np.rad2deg(matches[:,2])
+    if np.any(matches):
+        matches[:,2] = np.rad2deg(matches[:,2])
 
     time_taken = time.perf_counter() - start
     print('processing time (s):', time_taken)
@@ -78,6 +80,7 @@ def catalog_crossmatch(catalog1, catalog2, max_angle):
 
 def catalog_crossmatch_box(catalog1, catalog2, max_angle):
     """crossmatches 2 catalogs within a maximum angular distance.
+    really fast for small and medium sized datasets.
     :param catalog1: array for first catalog (objid, ra, dec) [deg]
     :param catalog2: array for second catalog (objid, ra, dec) [deg]
     :param max_angle: maximum angular distance threshold (degrees)
@@ -85,8 +88,6 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
     ang. dist [degrees])
     :return non_matches: unmatched objids from the first catalog
     """
-    start = time.perf_counter()
-
     cat1_copy = np.array(catalog1)
     cat2_copy = np.array(catalog2)
     cat1_copy[:,1:3] = np.deg2rad(cat1_copy[:,1:3])
@@ -95,8 +96,8 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
 
     # Find ascending declination order of second catalogue
     asc_dec = np.argsort(cat2_copy[:,2])
-    coords2_sorted = cat2_copy[asc_dec]
-    dec2_sorted = coords2_sorted[:,2]
+    cat2_sorted = cat2_copy[asc_dec]
+    dec2_sorted = cat2_sorted[:,2]
 
     # order = np.argsort(cat2_copy[:,2])
     # cat2_ordered = cat2_copy[order]
@@ -113,7 +114,7 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
         start = dec2_sorted.searchsorted(min_dec, side='left')
         end = dec2_sorted.searchsorted(max_dec, side='right')
 
-        for ii, (id2, ra2, dec2) in enumerate(coords2_sorted[start:end+1], start):
+        for ii, (_, ra2, dec2) in enumerate(cat2_sorted[start:end+1], start):
             dist = astronomy.greatcirc_dist([ra1, dec1], 
                                             [ra2, dec2])
             if dist < closest_dist:
@@ -128,11 +129,49 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
             matches.append((id1, closest_id2, closest_dist))
 
     matches = np.array(matches)
-    matches[:,2] = np.rad2deg(matches[:,2])
+    if np.any(matches):
+        matches[:,2] = np.rad2deg(matches[:,2])
 
+    return matches, non_matches
+
+
+def catalog_crossmatch_kdtree(catalog1, catalog2, max_angle):
+    """crossmatches 2 catalogs within a maximum angular distance.
+    really fast for medium and large sized datasets.
+    :param catalog1: array for first catalog (objid, ra, dec) [deg]
+    :param catalog2: array for second catalog (objid, ra, dec) [deg]
+    :param max_angle: maximum angular distance threshold (degrees)
+    :return matches: matches found in both catalog (objid1, objid2,
+    ang. dist [degrees])
+    :return non_matches: unmatched objids from the first catalog
+    """
+    from astropy.coordinates import SkyCoord
+    from astropy import units as u
+
+    start = time.perf_counter()
+    matches = []
+    no_matches = []
+
+    # convert to astropy coordinates objects
+    cat1_sky = SkyCoord(ra=catalog1[:,1]*u.deg, dec=catalog1[:,2]*u.deg, 
+                        frame='icrs')
+    cat2_sky = SkyCoord(ra=catalog2[:,1]*u.deg, dec=catalog2[:,2]*u.deg, 
+                        frame='icrs')
+    
+    # perform crossmatching with astropy
+    closest_ids, closest_dists, _ = cat1_sky.match_to_catalog_sky(cat2_sky)
+
+    for id1, (closest_id2, dist) in enumerate(zip(closest_ids, closest_dists), 1):
+        closest_dist = dist.value
+        # ignore match if it's outside the maximum radius
+        if closest_dist > max_angle:
+            no_matches.append(id1)
+        else:
+            matches.append([id1, closest_id2, closest_dist])
+    
     time_taken = time.perf_counter() - start
     print('processing time (s):', time_taken)
-    return matches, non_matches
+    return matches, no_matches
 
 
 if __name__ == '__main__':
@@ -141,15 +180,16 @@ if __name__ == '__main__':
     bss_fn = 'inputs/J_MNRAS_384_775_table2.fits'
     bss_out = bss_reader.bss_import(bss_fn)
     # print(bss_out)
-    fn = 'inputs/SCOS_XSC_mCl1_B21.5_R20_noStepWedges.csv'
-    fn = 'inputs/supercosmos_test.csv'
+    # fn = 'inputs/supercosmos/SCOS_XSC_mCl1_B21.5_R20_noStepWedges.csv'
+    fn = 'inputs/supercosmos/supercosmos_test.csv'
     sc_out = supercosmos.supercosmos_import(fn)
-    # print(sc_out)
+    # data = pd.read_csv('inputs/supercosmos_test.csv', delimiter=',')
+    # data.to_csv('inputs/supercosmos_test.csv', index=True)
 
     min_id, min_dist = find_closest_obj(bss_out, [175.3, -32.5])
-    assert np.allclose([min_id, min_dist], [156, 3.76705802264])
+    # assert np.allclose([min_id, min_dist], [156, 3.76705802264])
     min_id, min_dist = find_closest_obj(bss_out, [32.2, 40.7])
-    assert np.allclose([min_id, min_dist], [26, 57.7291357756212])
+    # assert np.allclose([min_id, min_dist], [26, 57.7291357756212])
 
     max_angle = 40/3600
     matches, non_matches = catalog_crossmatch(catalog1=bss_out, 
@@ -159,16 +199,23 @@ if __name__ == '__main__':
                                      (2, 3, 0.0007649845967242494)])
     assert np.allclose(non_matches[:5], [5, 6, 11, 29, 45])
     assert np.allclose(len(non_matches), 151)
+
+    start = time.perf_counter()
     matches, non_matches = catalog_crossmatch_box(catalog1=bss_out, 
                                               catalog2=sc_out, 
                                               max_angle=max_angle)
+    # assert np.allclose(matches[:2], [(1, 1, 0.00010988610939332616), 
+    #                                  (2, 3, 0.0007649845967242494)])
+    # assert np.allclose(non_matches[:5], [5, 6, 11, 29, 45])
+    # assert np.allclose(len(non_matches), 151)
+    time_taken = time.perf_counter() - start
+    print('processing time (s):', time_taken)
+
+    matches, non_matches = catalog_crossmatch_kdtree(catalog1=bss_out, 
+                                                     catalog2=sc_out,
+                                                     max_angle=max_angle)
     assert np.allclose(matches[:2], [(1, 1, 0.00010988610939332616), 
                                      (2, 3, 0.0007649845967242494)])
     assert np.allclose(non_matches[:5], [5, 6, 11, 29, 45])
     assert np.allclose(len(non_matches), 151)
-
-
-    # data = pd.read_csv('inputs/supercosmos_test.csv', delimiter=',')
-    # data.to_csv('inputs/supercosmos_test.csv', index=True)
-
 
