@@ -135,7 +135,7 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
     return matches, non_matches
 
 
-def catalog_crossmatch_kdtree(catalog1, catalog2, max_angle):
+def catalog_crossmatch_kdtree(catalog1, cidx_cat1, catalog2, cidx_cat2, max_angle):
     """crossmatches 2 catalogs within a maximum angular distance.
     really fast for medium and large sized datasets.
     :param catalog1: array for first catalog (objid, ra, dec) [deg]
@@ -153,9 +153,9 @@ def catalog_crossmatch_kdtree(catalog1, catalog2, max_angle):
     no_matches = []
 
     # convert to astropy coordinates objects
-    cat1_sky = SkyCoord(ra=catalog1[:,1]*u.deg, dec=catalog1[:,2]*u.deg, 
+    cat1_sky = SkyCoord(ra=catalog1[:,cidx_cat1[0]]*u.deg, dec=catalog1[:,cidx_cat1[1]]*u.deg, 
                         frame='icrs')
-    cat2_sky = SkyCoord(ra=catalog2[:,1]*u.deg, dec=catalog2[:,2]*u.deg, 
+    cat2_sky = SkyCoord(ra=catalog2[:,cidx_cat2[0]]*u.deg, dec=catalog2[:,cidx_cat2[1]]*u.deg, 
                         frame='icrs')
     
     # perform crossmatching with astropy
@@ -174,9 +174,7 @@ def catalog_crossmatch_kdtree(catalog1, catalog2, max_angle):
     return matches, no_matches
 
 
-if __name__ == '__main__':
-    pass
-
+def tmp_test():
     bss_fn = 'inputs/J_MNRAS_384_775_table2.fits'
     bss_out = bss_reader.bss_import(bss_fn)
     # print(bss_out)
@@ -219,3 +217,16 @@ if __name__ == '__main__':
     assert np.allclose(non_matches[:5], [5, 6, 11, 29, 45])
     assert np.allclose(len(non_matches), 151)
 
+
+if __name__ == '__main__':
+    pass
+
+    catalog1 = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',').to_numpy()
+    cat2_radec_col = [1,2]
+    catalog2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',').to_numpy()
+    cat2_radec_col = [3,4]
+
+    max_angle = 1/3600
+    matches, non_matches = catalog_crossmatch_kdtree(catalog1, cat2_radec_col, catalog2, cat2_radec_col, max_angle)
+    print(matches)
+    
