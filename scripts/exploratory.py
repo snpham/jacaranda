@@ -1,5 +1,7 @@
 import numpy as np
 from astropy.io import fits
+import pandas as pd
+import crossmatch
 
 
 def calculate_mean(vals):
@@ -261,9 +263,7 @@ def greatcirc_dist(coords1, coords2):
   return d
 
 
-if __name__ == '__main__':
-  pass
-
+def test_exploratory():
   fluxes = [23.3, 42.1, 2.0, -3.2, 55.6]
   m = np.mean(fluxes)
   m2 = sum(fluxes)/len(fluxes)
@@ -272,3 +272,21 @@ if __name__ == '__main__':
   h_degs = greatcirc_dist(np.deg2rad([21.07, 0.1]), 
                           np.deg2rad([21.15, 8.2]))
   assert np.allclose(np.rad2deg(h_degs), 8.1003923)
+
+
+if __name__ == '__main__':
+      
+  pass
+
+
+  cat_sdss = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',').to_numpy()
+  cat_sdss_radec_col = [1,2]
+  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/gz2_hart16.csv', delimiter=',').to_numpy()
+  cat_gzoo2_radec_col = [1,2]
+
+  max_angle = 1/3600
+  matches, non_matches = crossmatch.catalog_crossmatch_kdtree(cat_sdss, cat_sdss_radec_col, 
+                                                              cat_gzoo2, cat_gzoo2_radec_col, 
+                                                              max_angle)
+  print(len(matches), len(non_matches))
+  

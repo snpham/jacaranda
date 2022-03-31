@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.io import fits
-import astronomy as astro
+import exploratory as astro
 
 
 def bss_import(fn):

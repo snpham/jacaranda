@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.io import fits
-import astronomy as astro
+import exploratory as astro
 import pandas as pd
 import time
 from dask import dataframe as dd

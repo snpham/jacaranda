@@ -63,7 +63,7 @@ url = 'https://skyserver.sdss.org/dr16/en/tools/chart/f_sql.aspx'
 # range3 = list(np.arange(ranges[-1]+0.001, 100, 0.001))
 # ranges = np.hstack([ranges, range3])
 
-ranges = list(np.arange(22.130+0.001, 100, 0.001))
+ranges = list(np.arange(27.911+0.1, 100, 1))
 
 chunks = [ranges[x:x+20] for x in range(0, len(ranges), 20)]
 
@@ -94,3 +94,4 @@ for chunk in chunks:
 
     # print(urls)
     asyncio.run(fetch_concurrent(urls))
+    

@@ -1,6 +1,6 @@
 from platform import machine
 import numpy as np
-import astronomy
+import exploratory
 import bss_reader
 import supercosmos
 import pandas as pd
@@ -26,7 +26,7 @@ def find_closest_obj(catalog, target_coord):
 
     for id1, ra1, dec1 in cat_copy:
         # get angular distance b/t target and current catalog object
-        dist = astronomy.greatcirc_dist([ra1, dec1], 
+        dist = exploratory.greatcirc_dist([ra1, dec1], 
                                         [target_ra, target_dec])
         # replace if distance is smaller than previous
         if dist < min_dist:
@@ -58,7 +58,7 @@ def catalog_crossmatch(catalog1, catalog2, max_angle):
     matches = []
     non_matches = []
     for id1, ra1, dec1 in cat1_copy:
-        dists = astronomy.greatcirc_dist([ra1, dec1], 
+        dists = exploratory.greatcirc_dist([ra1, dec1], 
                                     [cat2_copy[:,1], cat2_copy[:,2]])
         closest_objid = np.argmin(dists)
         closest_dist = dists[closest_objid]
@@ -115,7 +115,7 @@ def catalog_crossmatch_box(catalog1, catalog2, max_angle):
         end = dec2_sorted.searchsorted(max_dec, side='right')
 
         for ii, (_, ra2, dec2) in enumerate(cat2_sorted[start:end+1], start):
-            dist = astronomy.greatcirc_dist([ra1, dec1], 
+            dist = exploratory.greatcirc_dist([ra1, dec1], 
                                             [ra2, dec2])
             if dist < closest_dist:
                 closest_sorted_id2 = ii

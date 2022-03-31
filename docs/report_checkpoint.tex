@@ -22,7 +22,7 @@
 \acmISBN{123-4567-24-567/08/06}
 
 %Conference
-\acmConference[Spring '22]{CSCI 6502 - Big Data Analytics}{March 2022}{Boulder , CO, USA} 
+\acmConference[Spring '22]{CSCI 6502 - Big Data Analytics}{Mar '22}{Boulder , CO, USA} 
 \acmYear{2022}
 \copyrightyear{2022}
 
@@ -30,7 +30,7 @@
 
 
 \begin{document}
-\title{Galaxy Morphological Classification with Big Data: An Analysis of Large Spectral and Photometric Datasets}
+\title{Galaxy Morphological Classification: An Analysis of Large Spectral and Photometric Datasets}
 \titlenote{Produces the permission block, and copyright information}
 \subtitle{Extended Abstract}
 
@@ -135,7 +135,7 @@ be a good indicator of galaxy morphology.
 This paper will go over in detail the approach to perform morphological classification of 
 galaxies using these available information from various sources. The main source of interest
 for the author is SDSS's data, which includes 100's of terabytes of data covering more
-than one-third of the entire celestial sphere \cite{SDSS}.
+than one-third of the entire celestial sphere \cite{abdurro}.
 
 
 \section{Literature Survey}
@@ -149,12 +149,82 @@ than one-third of the entire celestial sphere \cite{SDSS}.
 
 \section{Datasets}
 
-SDSS Imaging dataset.
+The main dataset source used in this project is the Sloan Digital Sky Survey (SDSS). 
+SDSS provides all the data captured from its instruments and encompasses over one-third
+of the entire celestial sphere. The latest data release from SDSS is Data Release 17 in
+December 2021 \cite{abdurro}, with an overview shown in Table \ref{tab:table_SDSS}. 
 \\
+A part of the SDSS instruments suite, the APOGEE-2 Survey
+contains high-resolution, near-infrared spectrograph that provides spectras across the 
+H-band wavelength regime, which lies between the near-infared 1.51-1.70 micron spectrum, 
+with an approximate resolution of 22,500. Although not currently used in the project,
+the author anticipate the information it contains from the H-band will benefit the
+analysis once the initial milestones are completed. 
+\\
+The main source used within SDSS was the data collected from their imaging system, which
+contains about one-third of the entire night sky. Five broad bands were defined and 
+used by SDSS, namely "u-g-r-i-z", which were the five rows of Charge Couple Devices (CCD's) 
+used by the imaging camera. The central wavelengths of the filters are shown in 
+Table \ref{tab:table_filters}, and a plot of the response curves of the color band 
+is shown in Figure \ref{fig:colorbands}, which shows the throughput that defines the 
+photometric system. More information on the camera system can be found on the SDSS 
+imaging website \cite{sdss_imaging}. 
 
 \begin{table}[]
-  \begin{tabular}{ |p{3cm}|p{2.8cm}|p{1.6cm}|  } \hline
-   Parameter & Description & Unit  \\ \hline
+  \begin{tabular}{ |p{2.2cm}|p{2.6cm}|  } \hline
+   \textbf{Filter Band} & \textbf{Wavelength (\AA)} \\ \hline
+   u & 3551 \\ \hline
+   g & 4686 \\ \hline
+   r & 6166 \\ \hline
+   i & 7480 \\ \hline
+   z & 8932 \\ \hline
+  \end{tabular}
+  \caption{\label{tab:table_filters}SDSS Color-band Filters \cite{sdss_imaging}}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.5]{camera_filters-300x274}
+  \caption{SDSS Imaging Colorbands \cite{sdss_imaging}}
+  \label{fig:colorbands}
+\end{figure}
+
+
+Although the images were not directly used in the project, value data from the five 
+color bands were used for analysis. This dataset contained almost half a billion unique 
+objects (stars, galaxies, etc.), with many parameters, though the author chose a selected 
+number of key parameters to be used in the machine learning model, shown in 
+Table \ref{tab:table_IMAGE}. the celestial right ascension and declination is used to 
+locate the object in the celestial sphere and to cross-match across other data sources. 
+The color bands are used to determine the dominant filter bands present in an object and 
+determine redshift. Adaptive 4th moments of object intensity are measured using a radial 
+Gaussian weight function, teratively adapted to the shape and size of the object. The 
+radius containing the 50\% and 90\% total Petrosian flux in each band is used to 
+determine the concentration of light for an object, which is the ratio of the radius 
+from the center of an object to the radius containing 50\% and 90\% of the total 
+Petrosian flux. Reference \cite{galaxy_photometry} provides an overview of using 
+Petrosian flux to determine the shape of a galaxy.
+
+\begin{table}[]
+  \begin{tabular}{ |p{4.0cm}|p{2.0cm}|p{1.3cm}|  } \hline
+   \textbf{Parameter} & \textbf{Description} & \textbf{Unit}  \\ \hline
+   Objid & object id  & - \\ \hline
+   RA & Celestial Right Ascension & deg \\ \hline
+   DEC & Celestial Declination & deg \\ \hline
+   u,g,r,i,z & SDSS color-band filters & \AA \\ \hline
+   mCr4\_u/g/r/i/z & Adaptive 4th moments of object intensity & (-) \\ \hline
+   petroR50\_u/g/r/i/z petroR90\_u/g/r/i/z & Radius containing 50/90\% total Petrosian Flux in each band & arcsec \\ \hline
+  \end{tabular}
+  \caption{\label{tab:table_IMAGE}SDSS Photometric Parameters Used}
+  \end{table}
+
+
+
+
+
+\begin{table}[]
+  \begin{tabular}{ |p{4.0cm}|p{2.0cm}|p{1.3cm}|  } \hline
+   \textbf{Parameter} & \textbf{Description} & \textbf{Unit}  \\ \hline
    Total unique area covered & 14,555  & sq. deg \\ \hline
    Total area of imaging (including overlaps) & 31,637 & sq. deg \\ \hline
    Individual image field size & 1361x2048 (0.0337) & pixels (sq. deg) \\ \hline
@@ -163,6 +233,7 @@ SDSS Imaging dataset.
    Median PSF FWHM, r-band & 1.3 & arcsec \\ \hline
    Pixel scale & 0.396 & arcsec \\ \hline
   \end{tabular}
+  \caption{\label{tab:table_SDSS}SDSS Dataset Sky Coverage \cite{abdurro}}
   \end{table}
 
 \section{Approach}
