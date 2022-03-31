@@ -13,7 +13,7 @@ def get_features_targets(data):
 
 
 if __name__ == "__main__":
-    data = np.load('sdss_galaxy_colors.npy')
+    data = np.load('inputs/SDSS/sdss_galaxy_colors.npy')
     features, targets = get_features_targets(data)
 
     # Initialize model

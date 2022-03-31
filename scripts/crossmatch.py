@@ -221,12 +221,19 @@ def tmp_test():
 if __name__ == '__main__':
     pass
 
-    catalog1 = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',').to_numpy()
-    cat2_radec_col = [1,2]
-    catalog2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',').to_numpy()
-    cat2_radec_col = [3,4]
+    # catalog1 = pd.read_csv('inputs/SDSS/sdss_full_test.csv', delimiter=',').to_numpy()
+    # cat2_radec_col = [1,2]
+    # # catalog2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',').to_numpy()
+    # # cat2_radec_col = [3,4]
+    # catalog2 = pd.read_csv('inputs/galaxyzoo/gz2_hart16.csv', delimiter=',').to_numpy()
+    # cat2_radec_col = [1,2]
 
-    max_angle = 1/3600
-    matches, non_matches = catalog_crossmatch_kdtree(catalog1, cat2_radec_col, catalog2, cat2_radec_col, max_angle)
-    print(matches)
+    # max_angle = 1/3600
+    # matches, non_matches = catalog_crossmatch_kdtree(catalog1, cat2_radec_col, catalog2, cat2_radec_col, max_angle)
+    # print(len(matches), len(non_matches))
     
+
+    catalog2 = pd.read_csv('inputs/galaxyzoo/gz2_hart16.csv', delimiter=',')
+    print(catalog2.lo[:,'gz2_class'].unique())
+    # for col in catalog2.columns:
+    #     print(col)

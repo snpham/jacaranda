@@ -17,7 +17,7 @@ def download_legacy(coordinates):
     params = {'ra': ra,
               'dec': dec,
               'layer': 'ls-dr9-north',
-              'pixscale': '0.27',
+              'pixscale': '0.04',
               'bands': 'grz',
               }
     
@@ -38,9 +38,17 @@ def view_fits_img(fn):
     # get image data
     image_data = fits.getdata(fn, ext=0)
     print(image_data.shape)
-    plt.figure()
-    plt.imshow(image_data[1], cmap=plt.cm.viridis)
-    plt.colorbar()
+    print(image_data[2])
+
+    f, axarr = plt.subplots(1,3, figsize=(10,8)) 
+    one = axarr[0].imshow(image_data[0], cmap=plt.cm.viridis)
+    two = axarr[1].imshow(image_data[1], cmap=plt.cm.viridis)
+    thr = axarr[2].imshow(image_data[2], cmap=plt.cm.viridis)
+    f.colorbar(one, ax=axarr[0], orientation="horizontal", pad=0.05)
+    f.colorbar(two, ax=axarr[1], orientation="horizontal", pad=0.05)
+    f.colorbar(thr, ax=axarr[2], orientation="horizontal", pad=0.05)
+    # plt.figure()
+    # plt.imshow(image_data[2], cmap=plt.cm.viridis)
     plt.show()
 
 
@@ -53,8 +61,7 @@ if __name__ == '__main__':
     # download_legacy(coordinates=coordinates)
 
     coordinates = list(product(
-        [[154.7709, 46.4537], 
-        [134.7709, 47.4537]]))
+        [[183.5918731689453,56.011436462402344], ]))
 
 
     pool = mp.Pool(mp.cpu_count() - 2)

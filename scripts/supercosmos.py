@@ -33,12 +33,6 @@ def supercosmos_import(fn):
     # print(df)
     # print(dask_df.head(10))
 
-    start = time.time()
-    spark1 = SparkSession.builder.appName('Ops').getOrCreate()
-    # df = spark.read.csv(fn, header=True)
-    # print(time.time() - start)
-
-
     return None
     # return pd_data.iloc[:, :3].to_numpy()
 

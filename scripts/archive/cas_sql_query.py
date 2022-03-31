@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # ranges2_test = list(np.linspace(15.1, 16, 10))
     ranges = np.hstack([range_i, range2])
 
-    range2 = list(np.arange(18.26, 100, 0.01))
+    range2 = list(np.arange(24.634, 100, 0.001))
     ranges = range2
 
     count = 1
