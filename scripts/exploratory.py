@@ -279,14 +279,32 @@ if __name__ == '__main__':
   pass
 
 
-  cat_sdss = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',').to_numpy()
+  cat_sdss = pd.read_csv('inputs/SDSS/sdss_full_hyp.csv', delimiter=',')
+  cat_sdss_np = cat_sdss.to_numpy()
   cat_sdss_radec_col = [1,2]
-  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/gz2_hart16.csv', delimiter=',').to_numpy()
-  cat_gzoo2_radec_col = [1,2]
+  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',')
+  cat_gzoo2_np = cat_gzoo2.to_numpy()
+  cat_gzoo2_radec_col = [3,4]
 
   max_angle = 1/3600
-  matches, non_matches = crossmatch.catalog_crossmatch_kdtree(cat_sdss, cat_sdss_radec_col, 
-                                                              cat_gzoo2, cat_gzoo2_radec_col, 
+  matches, non_matches = crossmatch.catalog_crossmatch_kdtree(cat_sdss_np, cat_sdss_radec_col, 
+                                                              cat_gzoo2_np, cat_gzoo2_radec_col, 
                                                               max_angle)
-  print(len(matches), len(non_matches))
+  matches = np.vstack(np.array(matches))
+  non_matches = np.vstack(np.array(non_matches))
+  with open('outputs/matches.csv', 'w') as f:
+    f.write(f'{matches}\n')
+  # print(len(matches), len(non_matches))
   
+
+  # match_sdss = cat_sdss.iloc[matches[:,0]]
+  # print(match_sdss)
+  # # cat2_partial = cat_gzoo2.iloc[matches[:,1], [3,4,8]]
+
+  # df = pd.DataFrame(columns=cat_sdss.columns)
+  # for ii, (idx1, idx2) in enumerate(zip(matches[:,0], matches[:,1])):
+  #   df.loc[ii] = cat_sdss.loc[idx1]
+  #   df.loc[ii, 'gzclass'] = cat_gzoo2.iloc[int(idx2), 8]
+
+  # print(df)
+  # print(matches)
