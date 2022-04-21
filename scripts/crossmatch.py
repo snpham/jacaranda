@@ -2,7 +2,7 @@ from platform import machine
 import numpy as np
 import exploratory
 import bss_reader
-import supercosmos
+import supercosmos_reader
 import pandas as pd
 import time
 

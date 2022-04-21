@@ -312,8 +312,22 @@ if __name__ == '__main__':
   df = cat_sdss_out.join(cat_gzoo2_out.set_index(cat_sdss_out.index))
   print(df)
 
-  df['gz2class'] = df['gz2class'].str.replace(r'^[S][0-9a-zA-Z:,\D]+', '0')
-  df['gz2class'] = df['gz2class'].str.replace(r'^[E][0-9a-zA-Z:,\D]+', '1')
+  # converting spirals to 0, elliptical to 1
+  df['gz2class'] = df['gz2class'].str.replace(r'^[S][0-9a-zA-Z:,\D]+', 'spiral')
+  df['gz2class'] = df['gz2class'].str.replace(r'^[E][0-9a-zA-Z:,\D]+', 'elliptical')
   print(df)
 
+  df['u-g'] = df['u'] - df['g']
+  df['g-r'] = df['g'] - df['r']
+  df['r-i'] = df['r'] - df['i']
+  df['r-z'] = df['r'] - df['z']
+
+  df['petro_cidx_u'] = df['petroR90_u']/df['petroR50_u']
+  df['petro_cidx_g'] = df['petroR90_g']/df['petroR50_g']
+  df['petro_cidx_r'] = df['petroR90_r']/df['petroR50_r']
+  df['petro_cidx_i'] = df['petroR90_i']/df['petroR50_i']
+  df['petro_cidx_z'] = df['petroR90_z']/df['petroR50_z']
+
+  print(df.columns)
+  # saving file
   df.to_csv('outputs/data_processed.csv')
