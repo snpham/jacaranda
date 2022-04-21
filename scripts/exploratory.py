@@ -279,32 +279,41 @@ if __name__ == '__main__':
   pass
 
 
-  cat_sdss = pd.read_csv('inputs/SDSS/sdss_full_hyp.csv', delimiter=',')
+  # read data
+  cat_sdss = pd.read_csv('inputs/SDSS/sdss_galaxies_test.csv', delimiter=',', header=0)
+  # cat_sdss = pd.read_csv('inputs/SDSS/sdss_galaxies.csv', delimiter=',', header=0)
   cat_sdss_np = cat_sdss.to_numpy()
-  cat_sdss_radec_col = [1,2]
-  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',')
+  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz_test.csv', delimiter=',', header=0)
+  # cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',', header=0)
   cat_gzoo2_np = cat_gzoo2.to_numpy()
+
+  # get rows of coordinates
+  cat_sdss_radec_col = [1,2]
   cat_gzoo2_radec_col = [3,4]
 
+  # crossmatching within max angle
   max_angle = 1/3600
   matches, non_matches = crossmatch.catalog_crossmatch_kdtree(cat_sdss_np, cat_sdss_radec_col, 
                                                               cat_gzoo2_np, cat_gzoo2_radec_col, 
                                                               max_angle)
+
+  # cleaning and saving matches                                                            
   matches = np.vstack(np.array(matches))
+  matches[:,0] -= 1
   non_matches = np.vstack(np.array(non_matches))
   with open('outputs/matches.csv', 'w') as f:
-    f.write(f'{matches}\n')
-  # print(len(matches), len(non_matches))
+    for m in matches:
+      f.write(f'{int(m[0])},{int(m[1])},{m[2]}\n')
   
+  # combining dataframes
+  cat_gzoo2.rename(columns = {'ra':'ra2', 'dec':'dec2'}, inplace = True)
+  cat_sdss_out = cat_sdss.iloc[matches[:,0].astype(int)]
+  cat_gzoo2_out = cat_gzoo2.iloc[matches[:,1].astype(int), [3,4,8]]
+  df = cat_sdss_out.join(cat_gzoo2_out.set_index(cat_sdss_out.index))
+  print(df)
 
-  # match_sdss = cat_sdss.iloc[matches[:,0]]
-  # print(match_sdss)
-  # # cat2_partial = cat_gzoo2.iloc[matches[:,1], [3,4,8]]
+  df['gz2class'] = df['gz2class'].str.replace(r'^[S][0-9a-zA-Z:,\D]+', '0')
+  df['gz2class'] = df['gz2class'].str.replace(r'^[E][0-9a-zA-Z:,\D]+', '1')
+  print(df)
 
-  # df = pd.DataFrame(columns=cat_sdss.columns)
-  # for ii, (idx1, idx2) in enumerate(zip(matches[:,0], matches[:,1])):
-  #   df.loc[ii] = cat_sdss.loc[idx1]
-  #   df.loc[ii, 'gzclass'] = cat_gzoo2.iloc[int(idx2), 8]
-
-  # print(df)
-  # print(matches)
+  df.to_csv('outputs/data_processed.csv')
