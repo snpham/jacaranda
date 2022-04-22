@@ -2,6 +2,10 @@ import numpy as np
 from astropy.io import fits
 import pandas as pd
 import crossmatch
+import matplotlib.pyplot as plt
+plt.style.use('seaborn')
+import plotly.express as px
+
 
 
 def calculate_mean(vals):
@@ -278,56 +282,58 @@ if __name__ == '__main__':
       
   pass
 
+  data = pd.read_csv('outputs/data_processed.csv', index_col=0, header=0)
+  print(data)
+  print(data.columns)
 
-  # read data
-  cat_sdss = pd.read_csv('inputs/SDSS/sdss_galaxies_test.csv', delimiter=',', header=0)
-  # cat_sdss = pd.read_csv('inputs/SDSS/sdss_galaxies.csv', delimiter=',', header=0)
-  cat_sdss_np = cat_sdss.to_numpy()
-  cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz_test.csv', delimiter=',', header=0)
-  # cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',', header=0)
-  cat_gzoo2_np = cat_gzoo2.to_numpy()
+  data = data[data['gz2class'] != 'A']
+  data_spiral = data[data['gz2class'] == 'spiral']
+  data_ellip = data[data['gz2class'] == 'elliptical']
+  # print(data_spiral)
+  # print(data_ellip)
 
-  # get rows of coordinates
-  cat_sdss_radec_col = [1,2]
-  cat_gzoo2_radec_col = [3,4]
+  # statistics for 4th moments
+  data = data[data['mCr4_u'] > -9000]
+  data = data[data['mCr4_g'] > -9000]
+  data = data[data['mCr4_r'] > -9000]
+  data = data[data['mCr4_i'] > -9000]
+  data = data[data['mCr4_z'] > -9000]
 
-  # crossmatching within max angle
-  max_angle = 1/3600
-  matches, non_matches = crossmatch.catalog_crossmatch_kdtree(cat_sdss_np, cat_sdss_radec_col, 
-                                                              cat_gzoo2_np, cat_gzoo2_radec_col, 
-                                                              max_angle)
+  # box plots
+  mCr4_u = px.box(data, x="gz2class", y="mCr4_u", notched=True, points='all')
+  mCr4_g = px.box(data, x="gz2class", y="mCr4_g", notched=True, points='all')
+  mCr4_r = px.box(data, x="gz2class", y="mCr4_r", notched=True, points='all')
+  mCr4_i = px.box(data, x="gz2class", y="mCr4_i", notched=True, points='all')
+  mCr4_z = px.box(data, x="gz2class", y="mCr4_z", notched=True, points='all')
+  # mCr4_u.show()
+  # mCr4_g.show()
+  # mCr4_r.show()
+  # mCr4_i.show()
+  # mCr4_z.show()
 
-  # cleaning and saving matches                                                            
-  matches = np.vstack(np.array(matches))
-  matches[:,0] -= 1
-  non_matches = np.vstack(np.array(non_matches))
-  with open('outputs/matches.csv', 'w') as f:
-    for m in matches:
-      f.write(f'{int(m[0])},{int(m[1])},{m[2]}\n')
+  # color filter statistics plots
+  u_g = px.box(data, x="gz2class", y="u-g", notched=True, points='all')
+  g_r = px.box(data, x="gz2class", y="g-r", notched=True, points='all')
+  r_i = px.box(data, x="gz2class", y="r-i", notched=True, points='all')
+  r_z = px.box(data, x="gz2class", y="r-z", notched=True, points='all')
+  # u_g.show()
+  # g_r.show()
+  # r_i.show()
+  # r_z.show()
+
+  # redshift statistics
+  data = data[data['z1'] < 0.3]
+  data_spiral = data_spiral[data_spiral['z1'] < 0.3]
+  data_ellip = data_spiral[data_spiral['z1'] < 0.3]
+  redshift = px.box(data, x="gz2class", y="z1", notched=True, points='all')
+  # redshift.show()
+
+  # polar plot of redshift with galaxy types
+  fig = px.scatter_polar(data, r="z1", theta="ra", color='gz2class', 
+  category_orders={'gz2class': ['elliptical', 'spiral']}, opacity=0.7)
+  fig.update_traces(marker=dict(size=3,))
+  fig.update_layout(legend=dict(
+      yanchor="top", y=0.65, xanchor="right", x=0.85,
+      font=dict(size=16, color="black"),))
+  fig.show()
   
-  # combining dataframes
-  cat_gzoo2.rename(columns = {'ra':'ra2', 'dec':'dec2'}, inplace = True)
-  cat_sdss_out = cat_sdss.iloc[matches[:,0].astype(int)]
-  cat_gzoo2_out = cat_gzoo2.iloc[matches[:,1].astype(int), [3,4,8]]
-  df = cat_sdss_out.join(cat_gzoo2_out.set_index(cat_sdss_out.index))
-  print(df)
-
-  # converting spirals to 0, elliptical to 1
-  df['gz2class'] = df['gz2class'].str.replace(r'^[S][0-9a-zA-Z:,\D]+', 'spiral')
-  df['gz2class'] = df['gz2class'].str.replace(r'^[E][0-9a-zA-Z:,\D]+', 'elliptical')
-  print(df)
-
-  df['u-g'] = df['u'] - df['g']
-  df['g-r'] = df['g'] - df['r']
-  df['r-i'] = df['r'] - df['i']
-  df['r-z'] = df['r'] - df['z']
-
-  df['petro_cidx_u'] = df['petroR90_u']/df['petroR50_u']
-  df['petro_cidx_g'] = df['petroR90_g']/df['petroR50_g']
-  df['petro_cidx_r'] = df['petroR90_r']/df['petroR50_r']
-  df['petro_cidx_i'] = df['petroR90_i']/df['petroR50_i']
-  df['petro_cidx_z'] = df['petroR90_z']/df['petroR50_z']
-
-  print(df.columns)
-  # saving file
-  df.to_csv('outputs/data_processed.csv')
