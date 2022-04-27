@@ -337,7 +337,7 @@ already has their data in this format, but sources such as the Australia Telesco
 Once all sources format is converted in to a common decimal degrees format, the 
 datasets can be read and integrated into a common database. To connect objects 
 from different surveys together, we must look at the coordinates of the
-objects within each catalog and cross-match to find its closest counterpart, 
+objects within each catalog and cross-match them to find their closest counterparts, 
 measured by the angular distance between them. Since the position of two given 
 objects are measured as points on a sphere, the great-circle distance must be 
 computed. This can be achieved using the haversine formula, which computes the 
@@ -372,6 +372,15 @@ performance for small and medium sized datasets, but slows down significantly fo
 with over 100 million data objects. The final method was to use a k-d tree to perform
 the crossmatching. Similar to the binary search algorithm, the k-d tree divides the 
 k-dimensional space into two parts recursively until each segment is it's own leaf.  
+
+Dan Gao et. al provided detailed overview of the k-d tree implementation to astronomy 
+applications \cite{dangao}. The algorithm requires the kd-tree is built once, then 
+the crossmatching query only need to reference the tree instead of having to scan 
+the entire catalog. Each branch in a tree represents a subvolume of the catalog space, 
+with the intermediate nodes (non-leaf) branching off to exactly two new branches 
+determined by splitting the parent's bounding box. The left new branch contain objects 
+that are less than the splitting value and the right branch contain objects greater 
+than that value.
 
 \subsection{Statistical Analysis}
 One of the major issues in working with large datasets is that the standard analytical

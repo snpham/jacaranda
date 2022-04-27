@@ -5,6 +5,7 @@ import crossmatch
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 import plotly.express as px
+import time
 
 
 
@@ -279,12 +280,20 @@ def test_exploratory():
 
 
 if __name__ == '__main__':
-      
-  pass
-
+  
+  # testing feather loading
+  start = time.perf_counter()
   data = pd.read_csv('outputs/data_processed.csv', index_col=0, header=0)
-  print(data)
-  print(data.columns)
+  print('processing time, csv (s):', time.perf_counter() - start)
+  start = time.perf_counter()
+  data = pd.read_feather('outputs/data_processed.feather')
+  print('processing time, feather (s):', time.perf_counter() - start)
+
+  pass
+  start = time.perf_counter()
+  # data = pd.read_csv('outputs/data_processed.csv', index_col=0, header=0)
+  # print(data)
+  # print(data.columns)
 
   data = data[data['gz2class'] != 'A']
   data_spiral = data[data['gz2class'] == 'spiral']
@@ -315,16 +324,16 @@ if __name__ == '__main__':
   u_g = px.box(data, x="gz2class", y="u-g", notched=True, points='all')
   g_r = px.box(data, x="gz2class", y="g-r", notched=True, points='all')
   r_i = px.box(data, x="gz2class", y="r-i", notched=True, points='all')
-  r_z = px.box(data, x="gz2class", y="r-z", notched=True, points='all')
+  i_z = px.box(data, x="gz2class", y="i-z", notched=True, points='all')
   # u_g.show()
   # g_r.show()
   # r_i.show()
   # r_z.show()
 
   # redshift statistics
-  data = data[data['z1'] < 0.3]
-  data_spiral = data_spiral[data_spiral['z1'] < 0.3]
-  data_ellip = data_spiral[data_spiral['z1'] < 0.3]
+  data = data[data['z1'] <= 0.25]
+  data_spiral = data_spiral[data_spiral['z1'] <= 0.25]
+  data_ellip = data_spiral[data_spiral['z1'] <= 0.25]
   redshift = px.box(data, x="gz2class", y="z1", notched=True, points='all')
   # redshift.show()
 
@@ -336,4 +345,4 @@ if __name__ == '__main__':
       yanchor="top", y=0.65, xanchor="right", x=0.85,
       font=dict(size=16, color="black"),))
   fig.show()
-  
+  print('processing time (s):', time.perf_counter() - start)

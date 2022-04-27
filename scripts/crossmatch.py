@@ -170,7 +170,7 @@ def catalog_crossmatch_kdtree(catalog1, cidx_cat1, catalog2, cidx_cat2, max_angl
             matches.append([id1, closest_id2, closest_dist])
     
     time_taken = time.perf_counter() - start
-    print('processing time (s):', time_taken)
+    print('kd-tree crossmatching time (s):', time_taken)
     return matches, no_matches
 
 
