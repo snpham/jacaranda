@@ -4,6 +4,9 @@ import pandas as pd
 import crossmatch
 import exploratory
 import time
+from sklearn.preprocessing import StandardScaler
+from scipy.stats import zscore
+
 
 def get_galaxies():
     cat_sdss = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',')
@@ -49,6 +52,8 @@ if __name__ == '__main__':
     cat_sdss = pd.read_feather('inputs/SDSS/sdss_galaxies.feather')
     cat_gzoo2 = pd.read_feather('inputs/galaxyzoo/zoo2MainSpecz.feather')
     print('reading time, feather (s):', time.perf_counter() - start)
+    # reading time, csv (s): 5.792976083
+    # reading time, feather (s): 0.3754684580000003
 
     # read data
     # cat_sdss = pd.read_csv('inputs/SDSS/sdss_galaxies_test.csv', delimiter=',', header=0)
@@ -100,7 +105,18 @@ if __name__ == '__main__':
     df['petro_cidx_i'] = df['petroR90_i']/df['petroR50_i']
     df['petro_cidx_z'] = df['petroR90_z']/df['petroR50_z']
 
+    # moving class labels to last column
+    df = df.drop(columns=['class', 'subclass', 'ra2', 'dec2'])
+    new_cols = [col for col in df.columns if col != 'gz2class'] + ['gz2class']
+    df = df[new_cols]
     # print(df.columns)
+
+    print(df)
+    # scaler = StandardScaler()
+    # df.iloc[:,3:-1] = (df.iloc[:,3:-1]-df.iloc[:,3:-1].min())/(df.iloc[:,3:-1].max()-df.iloc[:,3:-1].min())
+
+    print(df)
+
     # saving file
     df.to_csv('outputs/data_processed.csv')
     df.reset_index().to_feather('outputs/data_processed.feather')
