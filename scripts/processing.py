@@ -37,11 +37,28 @@ def get_matches():
             f.write(f'{int(m[0]-1)},{int(m[1])},{m[2]}\n')
 
 
+def speed_test():
+    # compare reading speeds full size
+    start = time.perf_counter()
+    cat_sdss = pd.read_csv('inputs/SDSS/sdss_full.csv', delimiter=',')
+    cat_gzoo2 = pd.read_csv('inputs/galaxyzoo/zoo2MainSpecz.csv', delimiter=',', header=0)
+    print('reading time full, csv (s):', time.perf_counter() - start)
+
+    cat_sdss.to_feather('inputs/SDSS/sdss_full.feather')
+    cat_gzoo2.to_feather('inputs/galaxyzoo/zoo2MainSpecz.feather')
+
+    start = time.perf_counter()
+    cat_sdss = pd.read_feather('inputs/SDSS/sdss_full.feather')
+    cat_gzoo2 = pd.read_feather('inputs/galaxyzoo/zoo2MainSpecz.feather')
+    print('reading time full, feather (s):', time.perf_counter() - start)
+
+
 if __name__ == '__main__':
     pass
 
-    # get_galaxies()
-    # get_matches()
+    get_galaxies()
+    get_matches()
+    # speed_test()
 
     # compare reading speeds
     start = time.perf_counter()
@@ -110,12 +127,6 @@ if __name__ == '__main__':
     new_cols = [col for col in df.columns if col != 'gz2class'] + ['gz2class']
     df = df[new_cols]
     # print(df.columns)
-
-    print(df)
-    # scaler = StandardScaler()
-    # df.iloc[:,3:-1] = (df.iloc[:,3:-1]-df.iloc[:,3:-1].min())/(df.iloc[:,3:-1].max()-df.iloc[:,3:-1].min())
-
-    print(df)
 
     # saving file
     df.to_csv('outputs/data_processed.csv')

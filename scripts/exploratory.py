@@ -309,26 +309,31 @@ if __name__ == '__main__':
   data = data[data['mCr4_z'] > -9000]
 
   # box plots
-  mCr4_u = px.box(data, x="gz2class", y="mCr4_u", notched=True, points='all')
-  mCr4_g = px.box(data, x="gz2class", y="mCr4_g", notched=True, points='all')
-  mCr4_r = px.box(data, x="gz2class", y="mCr4_r", notched=True, points='all')
-  mCr4_i = px.box(data, x="gz2class", y="mCr4_i", notched=True, points='all')
-  mCr4_z = px.box(data, x="gz2class", y="mCr4_z", notched=True, points='all')
-  # mCr4_u.show()
-  # mCr4_g.show()
-  # mCr4_r.show()
-  # mCr4_i.show()
-  # mCr4_z.show()
+  # adaptive fourth moments of objects
+  mCr4s = ["mCr4_u", "mCr4_g", "mCr4_r", "mCr4_i", "mCr4_z"]
+  # for mCr4 in mCr4s:
+  #   fig = px.box(data, x="gz2class", y=mCr4, notched=True, points='all')
+  #   fig.update_layout(
+  #     title=f"Adaptive Fourth Moments of Object, {mCr4}",
+  #     xaxis_title="Galaxy Type",
+  #     yaxis_title="Intensity",
+  #     legend_title="Galaxy Type",
+  #     font=dict(size=18))
+  #   fig.show()
+
 
   # color filter statistics plots
-  u_g = px.box(data, x="gz2class", y="u-g", notched=True, points='all')
-  g_r = px.box(data, x="gz2class", y="g-r", notched=True, points='all')
-  r_i = px.box(data, x="gz2class", y="r-i", notched=True, points='all')
-  i_z = px.box(data, x="gz2class", y="i-z", notched=True, points='all')
-  # u_g.show()
-  # g_r.show()
-  # r_i.show()
-  # r_z.show()
+  bands = ["u-g", "g-r", "r-i", "i-z"]
+  # for band in bands:
+  #   fig = px.box(data, x="gz2class", y=band, notched=True, points='all')
+  #   fig.update_layout(
+  #     title=f"Color Bands, {band}",
+  #     xaxis_title="Galaxy Type",
+  #     yaxis_title="Intensity",
+  #     legend_title="Galaxy Type",
+  #     font=dict(size=18))
+  #   fig.show()
+
 
   # redshift statistics
   data = data[data['z1'] <= 0.25]
@@ -343,6 +348,6 @@ if __name__ == '__main__':
   fig.update_traces(marker=dict(size=3,))
   fig.update_layout(legend=dict(
       yanchor="top", y=0.65, xanchor="right", x=0.85,
-      font=dict(size=16, color="black"),))
+      font=dict(size=18, color="black"),))
   fig.show()
   print('processing time (s):', time.perf_counter() - start)
