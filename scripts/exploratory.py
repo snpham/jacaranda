@@ -311,28 +311,39 @@ if __name__ == '__main__':
   # box plots
   # adaptive fourth moments of objects
   mCr4s = ["mCr4_u", "mCr4_g", "mCr4_r", "mCr4_i", "mCr4_z"]
-  # for mCr4 in mCr4s:
-  #   fig = px.box(data, x="gz2class", y=mCr4, notched=True, points='all')
-  #   fig.update_layout(
-  #     title=f"Adaptive Fourth Moments of Object, {mCr4}",
-  #     xaxis_title="Galaxy Type",
-  #     yaxis_title="Intensity",
-  #     legend_title="Galaxy Type",
-  #     font=dict(size=18))
-  #   fig.show()
+  for mCr4 in mCr4s:
+    fig = px.box(data, x="gz2class", y=mCr4, notched=True, points='all')
+    fig.update_layout(
+      title=f"Adaptive Fourth Moments of Object, {mCr4}",
+      xaxis_title="Galaxy Type",
+      yaxis_title="Intensity",
+      legend_title="Galaxy Type",
+      font=dict(size=18))
+    fig.show()
 
+  # pflux
+  cidxs = ['petro_cidx_u','petro_cidx_g','petro_cidx_r','petro_cidx_i','petro_cidx_z']
+  for cidx in cidxs:
+    fig = px.box(data, x="gz2class", y=cidx, notched=True, points='all')
+    fig.update_layout(
+      title=f"Petrosian Concentration Index, {cidx}",
+      xaxis_title="Galaxy Type",
+      yaxis_title="Intensity",
+      legend_title="Galaxy Type",
+      font=dict(size=18))
+    fig.show()
 
   # color filter statistics plots
   bands = ["u-g", "g-r", "r-i", "i-z"]
-  # for band in bands:
-  #   fig = px.box(data, x="gz2class", y=band, notched=True, points='all')
-  #   fig.update_layout(
-  #     title=f"Color Bands, {band}",
-  #     xaxis_title="Galaxy Type",
-  #     yaxis_title="Intensity",
-  #     legend_title="Galaxy Type",
-  #     font=dict(size=18))
-  #   fig.show()
+  for band in bands:
+    fig = px.box(data, x="gz2class", y=band, notched=True, points='all')
+    fig.update_layout(
+      title=f"Color Bands, {band}",
+      xaxis_title="Galaxy Type",
+      yaxis_title="Intensity",
+      legend_title="Galaxy Type",
+      font=dict(size=18))
+    fig.show()
 
 
   # redshift statistics

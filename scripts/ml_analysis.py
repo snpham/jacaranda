@@ -22,6 +22,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 def randomforest(max_depth):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
     
@@ -34,10 +35,12 @@ def randomforest(max_depth):
     # make predictions using the same features
     predictions = clf.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'randomforest ({max_depth}) f1: {f1:.4f}')
+    time_s = time.perf_counter() - start
+    print(f'randomforest ({max_depth}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def svms(kernel):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
 
@@ -48,10 +51,12 @@ def svms(kernel):
     # make predictions using the same features
     predictions = svc.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'svm ({kernel}) f1: {f1:.4f}')
+    time_s = time.perf_counter() - start
+    print('svm ({kernel}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def logregression(penalty):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
 
@@ -59,12 +64,14 @@ def logregression(penalty):
     logreg.fit(X_train, Y_train)
     predictions = logreg.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'logregression ({penalty}) f1: {f1:.4f}')
     # report = classification_report(y_test, predictions)
     # print(report)
+    time_s = time.perf_counter() - start
+    print(f'logregression ({penalty}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def knearest(n_neighbors):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
 
@@ -72,10 +79,12 @@ def knearest(n_neighbors):
     reg_knn.fit(X_train, Y_train)
     predictions = reg_knn.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'k-nearest neighbors ({n_neighbors}) f1: {f1:.4f}')
+    time_s = time.perf_counter() - start
+    print(f'k-nearest neighbors ({n_neighbors}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def adaboost(n):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
 
@@ -83,10 +92,12 @@ def adaboost(n):
     ada.fit(X_train, Y_train)
     predictions = ada.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'adaboost ({n}) f1: {f1:.4f}')
+    time_s = time.perf_counter() - start
+    print(f'adaboost ({n}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def sgboost(n):
+    start = time.perf_counter()
 
     X_train, x_test, Y_train, y_test = load_sets()
 
@@ -94,7 +105,8 @@ def sgboost(n):
     sgb.fit(X_train, Y_train)
     predictions = sgb.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'stochastic grad boost ({n}) f1: {f1:.4f}')
+    time_s = time.perf_counter() - start
+    print(f'stochastic grad boost ({n}) f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 def mlpmnn(layer):
@@ -112,7 +124,8 @@ def mlpmnn(layer):
     mlp.fit(X_train, Y_train)
     predictions = mlp.predict(x_test)
     f1 = f1_score(y_test, predictions, average='macro')
-    print(f'multi-layer perceptron {layer} f1: {f1:.4f}, time (s): {time.perf_counter() - start}')
+    time_s = time.perf_counter() - start
+    print(f'mlp {layer} f1: {f1:.4f}, time (s): {time_s:.2f}')
 
 
 
@@ -140,67 +153,145 @@ if __name__ == '__main__':
 
     # random forest
     maxdepth = list(product([1, 5, 10, 15, 20, 30, 50]))
-    pool = mp.Pool(mp.cpu_count() - 4)
-    
+    # pool = mp.Pool(mp.cpu_count() - 4)
     # check = pool.starmap(randomforest, maxdepth)
     # pool.close()
     # pool.join()
-    # without normalization
-    # randomforest (1) f1: 0.7303454914593727
-    # randomforest (5) f1: 0.7804921516234901
-    # randomforest (10) f1: 0.8081521435845178
-    # randomforest (15) f1: 0.8177741515693964
-    # randomforest (20) f1: 0.8202972259259638
-    # randomforest (30) f1: 0.8204639999130131
-    # randomforest (50) f1: 0.8209898238067115
+    # 228k objects
+    # randomforest (1) f1: 0.7303, time (s): 9.78
+    # randomforest (5) f1: 0.7805, time (s): 32.23
+    # randomforest (10) f1: 0.8082, time (s): 54.23
+    # randomforest (15) f1: 0.8178, time (s): 71.60
+    # randomforest (20) f1: 0.8203, time (s): 82.51
+    # randomforest (30) f1: 0.8205, time (s): 90.19
+    # randomforest (50) f1: 0.8210, time (s): 89.98 
+    # 100k objects
+    # randomforest (1) f1: 0.7442, time (s): 4.10
+    # randomforest (5) f1: 0.8044, time (s): 13.09
+    # randomforest (10) f1: 0.8322, time (s): 22.30
+    # randomforest (15) f1: 0.8392, time (s): 29.00
+    # randomforest (20) f1: 0.8385, time (s): 33.42
+    # randomforest (30) f1: 0.8398, time (s): 35.61
+    # randomforest (50) f1: 0.8395, time (s): 35.63
     # 50k objects
-    # randomforest (1) f1: 0.7760615241070277
-    # randomforest (5) f1: 0.8252447262701554
-    # randomforest (10) f1: 0.8505456092818902
-    # randomforest (15) f1: 0.8571269929828806
-    # randomforest (20) f1: 0.8598315759178976
-    # randomforest (30) f1: 0.85631564578933
-    # randomforest (50) f1: 0.8548788022472233
+    # randomforest (1) f1: 0.7498, time (s): 1.98
+    # randomforest (5) f1: 0.8073, time (s): 6.12
+    # randomforest (10) f1: 0.8343, time (s): 10.08
+    # randomforest (15) f1: 0.8413, time (s): 13.53
+    # randomforest (20) f1: 0.8417, time (s): 15.17
+    # randomforest (30) f1: 0.8410, time (s): 15.89
+    # randomforest (50) f1: 0.8390, time (s): 15.79
+    # 25k objects
+
 
     # adaboost
     n_leaners = list(product([1, 5, 10, 20, 50, 100, 200, 500]))
-    check = pool.starmap(adaboost, n_leaners)
-    pool.close()
-    pool.join()
-    # adaboost (1) f1: 0.7267489978996022
-    # adaboost (5) f1: 0.7431069654743305
-    # adaboost (10) f1: 0.7665777833409222
-    # adaboost (20) f1: 0.7786024321322966
-    # adaboost (50) f1: 0.79121652923077
-    # adaboost (100) f1: 0.7988385960074693
-    # adaboost (200) f1: 0.804033147046551
-    # adaboost (500) f1: 0.8078148310623934
+    # pool = mp.Pool(mp.cpu_count() - 4)
+    # check = pool.starmap(adaboost, n_leaners)
+    # pool.close()
+    # pool.join()
+    # 228k objects
+    # adaboost (1) f1: 0.7267, time (s): 2.72
+    # adaboost (5) f1: 0.7431, time (s): 5.19
+    # adaboost (10) f1: 0.7666, time (s): 8.46
+    # adaboost (20) f1: 0.7786, time (s): 14.56
+    # adaboost (50) f1: 0.7912, time (s): 33.04
+    # adaboost (100) f1: 0.7988, time (s): 62.84
+    # adaboost (200) f1: 0.8040, time (s): 121.54
+    # adaboost (500) f1: 0.8078, time (s): 293.48
+    # 100k objects
+    # adaboost (1) f1: 0.7495, time (s): 1.19
+    # adaboost (5) f1: 0.7688, time (s): 2.27
+    # adaboost (10) f1: 0.7875, time (s): 3.50
+    # adaboost (20) f1: 0.7967, time (s): 6.07
+    # adaboost (50) f1: 0.8093, time (s): 13.52
+    # adaboost (100) f1: 0.8157, time (s): 25.77
+    # adaboost (200) f1: 0.8213, time (s): 49.33
+    # adaboost (500) f1: 0.8257, time (s): 120.40
     # 50k objects
-    # adaboost (1) f1: 0.7870536316509607
-    # adaboost (5) f1: 0.7944092582153397
-    # adaboost (10) f1: 0.8044442515411168
-    # adaboost (20) f1: 0.8152179135145923
-    # adaboost (50) f1: 0.8370308477597781
-    # adaboost (100) f1: 0.8458370466081858
-    # adaboost (200) f1: 0.8476876502472999
-    # adaboost (500) f1: 0.8507049901462904
+    # adaboost (1) f1: 0.7629, time (s): 0.58
+    # adaboost (5) f1: 0.7896, time (s): 1.08
+    # adaboost (10) f1: 0.7964, time (s): 1.72
+    # adaboost (20) f1: 0.8077, time (s): 2.93
+    # adaboost (50) f1: 0.8171, time (s): 6.52
+    # adaboost (100) f1: 0.8245, time (s): 12.74
+    # adaboost (200) f1: 0.8287, time (s): 24.59
+    # adaboost (500) f1: 0.8366, time (s): 58.97
+    # 25k objects
+
+
 
     # stochastic gradient boosting
     n_leaners = list(product([1, 5, 10, 20, 50, 100, 200, 500]))
+    # pool = mp.Pool(mp.cpu_count() - 4)
     # check = pool.starmap(sgboost, n_leaners)
     # pool.close()
     # pool.join()
-    # stochastic grad boost (1) f1: 0.3645528726989167
-    # stochastic grad boost (5) f1: 0.7671040215433715
-    # stochastic grad boost (10) f1: 0.7804324298444166
-    # stochastic grad boost (20) f1: 0.7892545080020885
-    # stochastic grad boost (50) f1: 0.8021472198380418
-    # stochastic grad boost (100) f1: 0.8106613365161859
-    # stochastic grad boost (200) f1: 0.8168589265684792
-    # stochastic grad boost (500) f1: 0.8217757750515524
+    # 228k objects
+    # stochastic grad boost (1) f1: 0.3646, time (s): 3.81
+    # stochastic grad boost (5) f1: 0.7671, time (s): 10.41
+    # stochastic grad boost (10) f1: 0.7804, time (s): 18.69
+    # stochastic grad boost (20) f1: 0.7893, time (s): 34.74
+    # stochastic grad boost (50) f1: 0.8021, time (s): 83.73
+    # stochastic grad boost (100) f1: 0.8107, time (s): 162.53
+    # stochastic grad boost (200) f1: 0.8169, time (s): 318.45
+    # stochastic grad boost (500) f1: 0.8218, time (s): 774.50
+    # 100k objects
+    # stochastic grad boost (1) f1: 0.4028, time (s): 1.62
+    # stochastic grad boost (5) f1: 0.7002, time (s): 4.32
+    # stochastic grad boost (10) f1: 0.7824, time (s): 7.72
+    # stochastic grad boost (20) f1: 0.8074, time (s): 14.27
+    # stochastic grad boost (50) f1: 0.8226, time (s): 33.76
+    # stochastic grad boost (100) f1: 0.8293, time (s): 66.33
+    # stochastic grad boost (200) f1: 0.8353, time (s): 128.69
+    # stochastic grad boost (500) f1: 0.8404, time (s): 316.01
+    # 50k objects
+    # stochastic grad boost (1) f1: 0.4030, time (s): 0.80
+    # stochastic grad boost (5) f1: 0.7111, time (s): 2.01
+    # stochastic grad boost (10) f1: 0.7692, time (s): 3.63
+    # stochastic grad boost (20) f1: 0.8066, time (s): 6.54
+    # stochastic grad boost (50) f1: 0.8260, time (s): 16.19
+    # stochastic grad boost (100) f1: 0.8360, time (s): 31.99
+    # stochastic grad boost (200) f1: 0.8390, time (s): 62.66
+    # stochastic grad boost (500) f1: 0.8454, time (s): 151.51
+    # 25k objects
+
+
+    # k-nearest neighbors
+    n_neighbors = list(product([1, 5, 10, 20, 30, 50]))
+    # pool = mp.Pool(mp.cpu_count() - 4)
+    # check = pool.starmap(knearest, n_neighbors)
+    # pool.close()
+    # pool.join()
+    # 228k objects
+    # k-nearest neighbors (1) f1: 0.7060, time (s): 131.96
+    # k-nearest neighbors (20) f1: 0.7735, time (s): 152.52
+    # k-nearest neighbors (10) f1: 0.7656, time (s): 152.52
+    # k-nearest neighbors (5) f1: 0.7571, time (s): 152.52
+    # k-nearest neighbors (30) f1: 0.7747, time (s): 152.55
+    # k-nearest neighbors (50) f1: 0.7757, time (s): 152.56
+    # 100k objects
+    # k-nearest neighbors (1) f1: 0.7303, time (s): 24.73
+    # k-nearest neighbors (20) f1: 0.7919, time (s): 34.49
+    # k-nearest neighbors (30) f1: 0.7942, time (s): 34.54
+    # k-nearest neighbors (5) f1: 0.7791, time (s): 34.61
+    # k-nearest neighbors (10) f1: 0.7860, time (s): 34.64
+    # k-nearest neighbors (50) f1: 0.7944, time (s): 34.70
+    # 50k objects
+    # k-nearest neighbors (1) f1: 0.7249, time (s): 7.07
+    # k-nearest neighbors (5) f1: 0.7803, time (s): 8.81
+    # k-nearest neighbors (50) f1: 0.7956, time (s): 8.89
+    # k-nearest neighbors (20) f1: 0.7930, time (s): 8.91
+    # k-nearest neighbors (30) f1: 0.7952, time (s): 9.05
+    # k-nearest neighbors (10) f1: 0.7852, time (s): 9.07
+    # 25k objects
+
+
+
 
     # svms
     kernels = list(product(['linear', 'poly', 'rbf']))
+    # pool = mp.Pool(mp.cpu_count() - 4)
     # check = pool.starmap(svms, kernels)
     # pool.close()
     # pool.join()
@@ -213,100 +304,57 @@ if __name__ == '__main__':
     # svm (poly) f1: 0.3645528726989167
     # svm (rbf) f1: 0.3645528726989167
 
-    # logistic regression
-    penalties = ['l2']
-    # for pen in penalties:
-    #     logregression(pen)
-    # with normalization
-    # logregression (l2) f1: 0.7331682730530195
-    # without normalization
-    # logregression (l2) f1: 0.7330428999395542
 
-    # k-nearest neighbors
-    n_neighbors = list(product([1, 5, 10, 20, 30, 50]))
-    # check = pool.starmap(knearest, n_neighbors)
-    # pool.close()
-    # pool.join()
-    # k-nearest neighbors (1) f1: 0.6957263451300708
-    # k-nearest neighbors (5) f1: 0.7401451419299696
-    # k-nearest neighbors (10) f1: 0.7505500016631921
-    # k-nearest neighbors (20) f1: 0.7607139054678177
-    # k-nearest neighbors (30) f1: 0.7614413598111676
-    # k-nearest neighbors (50) f1: 0.7618164237789349
-    # without normalization
-    # k-nearest neighbors (1) f1: 0.7059521778693815
-    # k-nearest neighbors (5) f1: 0.7571271414602448
-    # k-nearest neighbors (10) f1: 0.7656058554900411
-    # k-nearest neighbors (20) f1: 0.7735366468960683
-    # k-nearest neighbors (30) f1: 0.7746545668068594
-    # k-nearest neighbors (50) f1: 0.7757132046270314
+
+
 
     # multi-layer perceptron
-    layers = [(1,1), (2,2), (5,2), (5,5), (2,2,2), (4,4,4), (8,8,8), (2,2,2,2), (5, 5, 5, 5), (8,8,8,8)]
-    # for layer in layers:
-    #     mlpmnn(layer)
-    # check = pool.starmap(mlpmnn, layers)
-    # pool.close()
-    # pool.join()
+    layers = [(1,1), (2,2), (5,2), (5,5), (2,2,2), (4,4,4), 
+            (8,8,8), (2,2,2,2), (5, 5, 5, 5), (8,8,8,8)]
+    for layer in layers:
+        mlpmnn(layer)
 
     # adam relu, 228k objects
-    # multi-layer perceptron (1, 1) f1: 0.7853407542214266, time (s): 11.7059435
-    # multi-layer perceptron (2, 2) f1: 0.7962184542367859, time (s): 12.386172834
-    # multi-layer perceptron (5, 2) f1: 0.811794594662048, time (s): 16.756201417
-    # multi-layer perceptron (5, 5) f1: 0.8093591644090954, time (s): 16.007910124999995
-    # multi-layer perceptron (2, 2, 2) f1: 0.7858913183339118, time (s): 33.928735333000006
-    # multi-layer perceptron (4, 4, 4) f1: 0.8099418323374714, time (s): 19.162512958000008
-    # multi-layer perceptron (8, 8, 8) f1: 0.8166629714689388, time (s): 17.631497666000016
-    # multi-layer perceptron (2, 2, 2, 2) f1: 0.7976289754713084, time (s): 24.893360290999993
-    # multi-layer perceptron (5, 5, 5, 5) f1: 0.8100497838476945, time (s): 33.158824041
-    # multi-layer perceptron (8, 8, 8, 8) f1: 0.815352430461644, time (s): 23.542501458999993
-    
-    # adam relu, 150k objects
-    # multi-layer perceptron (1, 1) f1: 0.8036443661227938, time (s): 10.670384417000001
-    # multi-layer perceptron (2, 2) f1: 0.8093040293040292, time (s): 9.408379833000001
-    # multi-layer perceptron (5, 2) f1: 0.8102257662518857, time (s): 11.561299207999998
-    # multi-layer perceptron (5, 5) f1: 0.8223366115164215, time (s): 18.365282959000005
-    # multi-layer perceptron (2, 2, 2) f1: 0.8039292567198577, time (s): 21.283074625000005
-    # multi-layer perceptron (4, 4, 4) f1: 0.8196108432820034, time (s): 16.74146574999999
-    # multi-layer perceptron (8, 8, 8) f1: 0.8221153383262403, time (s): 14.019208374999991
-    # multi-layer perceptron (2, 2, 2, 2) f1: 0.8077052506081321, time (s): 21.78746975
-    # multi-layer perceptron (5, 5, 5, 5) f1: 0.8195925319299953, time (s): 12.43264145800002
-    # multi-layer perceptron (8, 8, 8, 8) f1: 0.8251028731973047, time (s): 16.592592584000016
-
-    # adam relu, 100k objects
-    # multi-layer perceptron (1, 1) f1: 0.8077848907689893, time (s): 9.047992958
-    # multi-layer perceptron (2, 2) f1: 0.8167027858972844, time (s): 8.157504416
-    # multi-layer perceptron (5, 2) f1: 0.8182414019443605, time (s): 8.928623125000001
-    # multi-layer perceptron (5, 5) f1: 0.8309747803501845, time (s): 12.778056375000002
-    # multi-layer perceptron (2, 2, 2) f1: 0.8081939897332482, time (s): 15.139135332999999
-    # multi-layer perceptron (4, 4, 4) f1: 0.8318014705882353, time (s): 11.028988249999998
-    # multi-layer perceptron (8, 8, 8) f1: 0.8364666193789837, time (s): 13.763977874999995
-    # multi-layer perceptron (2, 2, 2, 2) f1: 0.8142163301063174, time (s): 5.403228999999996
-    # multi-layer perceptron (5, 5, 5, 5) f1: 0.8315257198930507, time (s): 11.609597707999995
-    # multi-layer perceptron (8, 8, 8, 8) f1: 0.8348342937790401, time (s): 14.594578041999995
-
+    # mlp (1, 1) f1: 0.7853, time (s): 11.27
+    # mlp (2, 2) f1: 0.7962, time (s): 12.48
+    # mlp (5, 2) f1: 0.8118, time (s): 16.81
+    # mlp (5, 5) f1: 0.8094, time (s): 15.97
+    # mlp (2, 2, 2) f1: 0.7859, time (s): 33.54
+    # mlp (4, 4, 4) f1: 0.8099, time (s): 19.06
+    # mlp (8, 8, 8) f1: 0.8167, time (s): 17.56
+    # mlp (2, 2, 2, 2) f1: 0.7976, time (s): 24.31
+    # mlp (5, 5, 5, 5) f1: 0.8100, time (s): 32.56
+    # mlp (8, 8, 8, 8) f1: 0.8154, time (s): 23.34
+    # 100k objects
+    # mlp (1, 1) f1: 0.8078, time (s): 8.70
+    # mlp (2, 2) f1: 0.8167, time (s): 8.14
+    # mlp (5, 2) f1: 0.8182, time (s): 8.96
+    # mlp (5, 5) f1: 0.8310, time (s): 12.60
+    # mlp (2, 2, 2) f1: 0.8082, time (s): 15.14
+    # mlp (4, 4, 4) f1: 0.8318, time (s): 11.11
+    # mlp (8, 8, 8) f1: 0.8365, time (s): 13.78
+    # mlp (2, 2, 2, 2) f1: 0.8142, time (s): 5.42
+    # mlp (5, 5, 5, 5) f1: 0.8315, time (s): 11.69
+    # mlp (8, 8, 8, 8) f1: 0.8348, time (s): 14.87
     # 50k objects
-    # multi-layer perceptron (1, 1) f1: 0.8140772437471969, time (s): 7.274933334
-    # multi-layer perceptron (2, 2) f1: 0.814509848550778, time (s): 7.437800667000001
-    # multi-layer perceptron (5, 2) f1: 0.8267244604380629, time (s): 6.965831000000001
-    # multi-layer perceptron (5, 5) f1: 0.840847701610899, time (s): 4.805234500000001
-    # multi-layer perceptron (2, 2, 2) f1: 0.8133321504009798, time (s): 10.722146167000002
-    # multi-layer perceptron (4, 4, 4) f1: 0.838006836111516, time (s): 6.6532272500000005
-    # multi-layer perceptron (8, 8, 8) f1: 0.8413785220683463, time (s): 6.709666374999998
-    # multi-layer perceptron (2, 2, 2, 2) f1: 0.8178480918306501, time (s): 2.4366880840000036
-    # multi-layer perceptron (5, 5, 5, 5) f1: 0.8396082163364378, time (s): 6.297046999999999
-    # multi-layer perceptron (8, 8, 8, 8) f1: 0.841715495029517, time (s): 9.361346333
-
+    # mlp (1, 1) f1: 0.8141, time (s): 6.42
+    # mlp (2, 2) f1: 0.8145, time (s): 7.04
+    # mlp (5, 2) f1: 0.8267, time (s): 6.69
+    # mlp (5, 5) f1: 0.8408, time (s): 4.58
+    # mlp (2, 2, 2) f1: 0.8133, time (s): 10.26
+    # mlp (4, 4, 4) f1: 0.8380, time (s): 6.43
+    # mlp (8, 8, 8) f1: 0.8414, time (s): 6.50
+    # mlp (2, 2, 2, 2) f1: 0.8178, time (s): 2.37
+    # mlp (5, 5, 5, 5) f1: 0.8396, time (s): 6.06
+    # mlp (8, 8, 8, 8) f1: 0.8417, time (s): 9.04
     # 25k objects
-    # multi-layer perceptron (1, 1) f1: 0.8216925746077572, time (s): 3.5875596660000006
-    # multi-layer perceptron (2, 2) f1: 0.8143106676947771, time (s): 2.070206583
-    # multi-layer perceptron (5, 2) f1: 0.8340285477682073, time (s): 2.5235157499999996
-    # multi-layer perceptron (5, 5) f1: 0.8545441926568533, time (s): 4.124674875
-    # multi-layer perceptron (2, 2, 2) f1: 0.816936776936591, time (s): 3.300061166999999
-    # multi-layer perceptron (4, 4, 4) f1: 0.8385536238884084, time (s): 3.714399708000002
-    # multi-layer perceptron (8, 8, 8) f1: 0.8532134418606854, time (s): 3.4175369589999995
-    # multi-layer perceptron (2, 2, 2, 2) f1: 0.829767134368895, time (s): 1.9169627499999997
-    # multi-layer perceptron (5, 5, 5, 5) f1: 0.8559468641053892, time (s): 3.4315830829999996
-    # multi-layer perceptron (8, 8, 8, 8) f1: 0.8556930463084556, time (s): 3.2679395830000004
-
-    
+    # mlp (1, 1) f1: 0.8217, time (s): 3.20
+    # mlp (2, 2) f1: 0.8143, time (s): 2.04
+    # mlp (5, 2) f1: 0.8340, time (s): 2.52
+    # mlp (5, 5) f1: 0.8545, time (s): 4.12
+    # mlp (2, 2, 2) f1: 0.8169, time (s): 3.34
+    # mlp (4, 4, 4) f1: 0.8386, time (s): 3.77
+    # mlp (8, 8, 8) f1: 0.8532, time (s): 3.49
+    # mlp (2, 2, 2, 2) f1: 0.8298, time (s): 1.94
+    # mlp (5, 5, 5, 5) f1: 0.8559, time (s): 3.47
+    # mlp (8, 8, 8, 8) f1: 0.8557, time (s): 3.29
