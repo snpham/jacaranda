@@ -50,7 +50,16 @@
 
 
 \begin{abstract}
-
+The goal of this project is to study ways to perform galaxy morphological classification 
+with high performance while maintaining efficiency in computational time. This project uses 
+celestial data from various data sources, such as SDSS and Galaxy Zoo, to create 
+classification models that provide high accuracies while analyzing its efficiencies. 
+Various techniques are used during the preprocessing and integration phase to help 
+speed up computational time and handle the "big data" of sky surveys. For analysis, several 
+machine learning models are developed and used in the study to compare the accuracy of 
+different models, which are parametrically varied for a more broader study. The dataset 
+sizes are also varied to study the effect of dataset sizes on computational speed, and 
+how this effects the performance of the models. 
 \end{abstract}
 
 %
@@ -359,7 +368,7 @@ catalog, the time complexity is O(n*m), where n and m are the counts of data obj
 in the catalogs. This is not an issue for catalogs with a few hundred samples,
 but typical catalogs such as the SDSS contains over a million data points, which will
 be prohibitively expensive to compute.
-
+\\
 An improved algorithm was used for this project's analysis. The first method was to
 use Python's numpy array structure to automatically loop through a catalog dataset. This
 provided a speed boost compared to standard Python standard library, but slowed down
@@ -372,7 +381,7 @@ performance for small and medium sized datasets, but slows down significantly fo
 with over 100 million data objects. The final method was to use a k-d tree to perform
 the crossmatching. Similar to the binary search algorithm, the k-d tree divides the 
 k-dimensional space into two parts recursively until each segment is it's own leaf.  
-
+\\
 Dan Gao et. al provided detailed overview of the k-d tree implementation to astronomy 
 applications \cite{dangao}. The algorithm requires the kd-tree is built once, then 
 the crossmatching query only need to reference the tree instead of having to scan 
@@ -433,26 +442,52 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
 
 
 
-\section{Results}
+\section{Results and Discussion}
 
  
 \subsection{Statistical Analysis}
 
+Exploratory statistical analysis was performed to explore the different 
+features that will be used in the machine learning models. The goal was to 
+statistically determine whether each feature was unique and provide useful 
+information for training. The following box figures show the statistical 
+representation of distribution of the features that were used in the machine 
+learning models. The figures show information regarding the distribution 
+through quartiles, with the median (quartile 3) marked by a horizontal line 
+inside the box (interquartile range) and the whiskers indicating the 1.5x 
+interquartile range. The scatter distribution is shown to the left of each 
+box plot. \\
+
+Figure \ref{fig:mcr4_u_stat} shows information for the adaptive fourth 
+moments of each object for the u color filter, and Figure \ref{fig:mcr4_z_stat} 
+for the z filter. From a data mining perspective, the statistical comparison 
+between spiral and elliptical galaxies relative to their fourth moments provide 
+little information on their differences. The key information from this result is 
+that elliptical data points tend to have slightly higher intensities in the 
+moments compared to spiral galaxies. Color filters u and g show a similar pattern. 
+For the r, i, z color filters, there is a pattern of elliptical galaxies having a 
+more tightly packed cluster in intensity compared to spirals.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.15]{mcr4_u_stat}
-  \caption{Adaptive 4th Moments - mCr4u}
+  \caption{Adaptive Fourth Moments - mCr4u}
   \label{fig:mcr4_u_stat}
 \end{figure}
-
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.15]{mcr4_z_stat}
-  \caption{Adaptive 4th Moments - mCr4u}
+  \caption{Adaptive Fourth Moments - mCr4z}
   \label{fig:mcr4_z_stat}
 \end{figure}
+
+Figure \ref{fig:petrosian_r} shows information for the Petrosian Concentration 
+Index of the r filter. This index is computed by the ratio of the Petrosian Flux 
+contained within two Petrosian Radii (contains 50\% and 90\% of the total flux). 
+This information represents the radial surface brightness profile of each object. 
+This figure show that the intensity of the concentration index is noticeably higher 
+compared to spiral galaxies. 
 
 \begin{figure}[htbp]
   \centering
@@ -461,6 +496,10 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
   \label{fig:petrosian_r}
 \end{figure}
 
+Figure \ref{fig:ug_stat} shows information for the color band u-g filter. Similar to 
+the previous figures, this plot shows a similar trend of greater intensities for 
+elliptical galaxies compared with spirals. Similarly, the trend is constant among 
+the different color bands.
 
 \begin{figure}[htbp]
   \centering
@@ -468,6 +507,13 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
   \caption{Color Filter - u-g}
   \label{fig:ug_stat}
 \end{figure}
+
+Figure \ref{fig:redshift_polar} shows the distribution of elliptical and spiral galaxies 
+relative to their right ascension coordinates versus their redshift magnitude. It can be 
+shown on this plot that spiral galaxies tend to cluster closer to the 0-0.15 redshift 
+compared to elliptical galaxies, where the magnitude expands further out to 0.25. The 
+information gathered above show interesting and distinct patterns between the two main 
+galaxy types, which will be used for the training of the machine learning models.
 
 \begin{figure}[htbp]
   \centering
@@ -478,6 +524,30 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
 
 
 \subsection{Machine Learning}
+ 
+The following tables show the results from various machine learning models 
+trained using the processed datasets. The goal of the analyses were to explore 
+how well different models perform versus each other using a series of parameter sets. 
+The analyses also include a comparison of efficiency versus accuracy for each model 
+trained using various dataset sizes. For this study, the full processed dataset size of 
+about 228,000 data points were used as the baseline, with 100K, 50K, 25K sizes used 
+as comparisons. For each run, the F1 score is shown along with the time it took 
+to run the training and prediction model. \\
+
+Figure \ref{fig:randomforest} show results for the random forest classifications 
+using various number of decision trees using size-varying training datasets. The 
+number of decision trees were the varying parameter: 1, 5, 10, 15, 20, 30, and 50. 
+As expected, as the number of trees increased, the F1 score also increases, though the 
+results show diminishing returns as the number goes above 20. Interestingly, the 
+number where the point of diminishing returns are reached is decreased as we 
+decrease the size of the dataset. At 100K, 50K, and 25K objects, this point is 
+reached near 10-20 trees, and the score even decreases as it approaches 50 trees. Even 
+more interesting is the F1 score relative to the size of the dataset used. The 
+results show that the less data objects present in the dataset, the better the training 
+model performed. With the full dataset and using 50 trees, the F1 score is 0.80, but if 
+the data is reduced to 25K, the F1 score increases to 0.85. This is beneficial 
+to the classification model, since reducing the dataset size significantly reduces the 
+speed it takes to train and run the model. 
 
 \begin{figure}[htbp]
   \centering
@@ -487,12 +557,27 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
 \end{figure}
 
 
+Figure \ref{fig:adaboost} show results for the AdaBoost model. Although it did not 
+perform better than from using random forests, it did show the similar pattern of 
+higher scores with smaller dataset sizes. These results did not show diminishing returns 
+as the number of weak learners are increased, so better performance may be achieved 
+with higher numbers. Even so, the time needed to perform this will not be better than 
+the random forest models, as shown in the figure.
+
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.35]{adaboost}
   \caption{AdaBoost Results}
   \label{fig:adaboost}
 \end{figure}
+
+Figure \ref{fig:stochasticboost} show results for the stochastic gradient boosting model 
+variant. This model performed better than AdaBoost and Random Forest, though at a cost of 
+computational time. Achieving the same 85\% F1 score with the 25K dataset as Random Forest 
+requires over 2x time increase in computational time. To gain another percentage in score, 
+this value increases to 5-10x. 
+
 
 \begin{figure}[htbp]
   \centering
@@ -501,12 +586,36 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
   \label{fig:stochasticboost}
 \end{figure}
 
+Figure \ref{fig:knearestneighbors} show results for a classification model using the 
+K-nearest neighbors algorithm. Although the model did not perform better than previous 
+models, it did show a similiar trend for the dataset sizes.  
+
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.35]{knearestneighbors}
   \caption{K-Nearest Neighbors Results}
   \label{fig:knearestneighbors}
 \end{figure}
+
+Figure \ref{fig:svms} show results for three various state vector machine models. 
+These models were used for a well-rounded algorithm comparison and were not 
+included in the accuracy versus efficiency study. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.35]{svms}
+  \caption{State Vector Machine Results}
+  \label{fig:svms}
+\end{figure}
+
+Finally, Figure \ref{fig:mlpnn} show results for the multi-layer percentron neural 
+network model. Varying layers and depth of layers were varied to show the 
+performance of varying simple neural networks. The figure shows mixed F1 results, though 
+higher scores is trending towards layers with larger node sizes rather than the depths of 
+the models. Here, networks with 5 and 8 nodes at each layer shows the best performance 
+compared to layers with only 1 or 2 nodes. Computational speed also show mixed results, 
+but the data size trend still holds. 
 
 \begin{figure}[htbp]
   \centering
@@ -515,25 +624,37 @@ Equation \ref{eqn_w2} shows the computation of the mean, and Equation \ref{eqn_w
   \label{fig:mlpnn}
 \end{figure}
 
-
-
-
-\section{Discussions}
-
-
-\subsection{Results}
-
-
-\subsection{Applications}
-
-
 \section{Conclusion}
 
+The results from this study showed many interesting points regarding galaxy morphological 
+classification using various machine learning models and dataset sizes. The models that 
+show best performance results from this study was with the stochastic gradient boost algorithm. 
+Though this may be biased due to it using a higher number of estimators compared to other models. 
+This high F1 score comes at a cost of high computational time required to run the models, costing 
+about 2x more compared to AdaBoost and over 10x more compared to Random Forests and Neural Networks. 
+Another interesting find in this study was the unnecessary need for data objects to perform 
+accurately. The data showed that 25K of data objects was sufficient to perform highly, and the 
+F1 performance actually drops as the data size is increased to 50K, 100K, and 228K. 
+\\  
+Future work will include exploring the data set sizes and look at other factors that may be 
+affecting this result, such as possible underfitting, overfitting, or using insignificant 
+attributes that may negatively be affecting the training models. Additional work includes 
+performing dimensionality reduction to reduce the number of poor attributes in the models, 
+searching for additional datasets that may provide useful information, and increasing the 
+efficiency of preprocessing, integrating, and transforming the dataset for use. Another 
+feature to add that will benefit the galaxy morphological classification model is to 
+implement convolutional neural networks and self-supervised learning techniques to 
+classify sky images produced by the many telescopes and instruments around the world and in orbit 
+around Earth. The James Webb telescope, which was launched late last year, will soon 
+be able to provide an unprecedented amount of high quality images and data of the universe 
+to scientists and engineers, and learning how to build effective and efficient analytical 
+systems capable of handling the incoming data streams will be of most importance.
 
 \section{Appendix}
 
 Honor Code Pledge
-
+"On my honor, as a University of Colorado Boulder student I have 
+neither given nor received unauthorized assistance."
 
 \bibliographystyle{acm}
 \bibliography{sigproc} 
